@@ -1,0 +1,281 @@
+body {
+    font-family: "Noto Sans TC", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f6f8;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Header */
+header {
+    background: #0066cc;
+    color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+header nav a {
+    color: #fff;
+    margin-left: 15px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+header nav a:hover {
+    text-decoration: underline;
+}
+
+/* Main */
+main {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Login Form */
+.login-container {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 40px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+.login-container h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.form-group button {
+    width: 100%;
+    padding: 10px;
+    background: #0066cc;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.form-group button:hover {
+    background-color: #0056b3;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 15px;
+    margin-top: 30px;
+    background: #f0f0f0;
+    color: #666;
+    font-size: 0.9rem;
+    border-top: 1px solid #ddd;
+}
+
+/* Student Info */
+.student-info {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    text-align: center;
+}
+.student-info h2 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.student-info p {
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    color: #555;
+}
+
+/* Exam Selection */
+.exam-selection {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+.exam-selection h2 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.exam-selection p {
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    color: #555;
+}
+
+.exam-selection a {
+    display: inline-block;
+    margin: 0 15px;
+    padding: 12px 24px;
+    background: #0066cc;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+}
+
+.exam-selection a:hover {
+    background: #004a99;
+}
+
+/* Exam Page and Result Page */
+.exam-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px 30px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.exam-container button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+    background: #0066cc;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.exam-container button:hover {
+    background: #004a99;
+}
+
+.question {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.question p {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.question img {
+    height: auto;
+    width: 100%;
+    display: block;
+    margin: 0 auto 10px auto;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 5px;
+    background: #fafafa;
+    box-sizing: border-box; 
+}
+
+.question input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.question input[type="text"]:focus {
+    border-color: #0066cc;
+    outline: none;
+}
+
+.question.correct {
+    border: 2px solid #28a745;
+}
+
+.question.wrong {
+    border: 2px solid #dc3545;
+}
+
+.correct-answer {
+    border: 2px solid #28a745;
+    color: #155724;
+    background: #d4edda;
+    padding: 5px;
+    width: 200px;
+}
+
+.wrong-answer {
+    border: 2px solid #dc3545;
+    color: #721c24;
+    background: #f8d7da;
+    padding: 5px;
+    width: 200px;
+}
+
+.correct-text {
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 5px;
+}
+
+.result-actions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.result-actions a {
+    display: inline-block;
+    margin: 0 10px;
+    padding: 10px 20px;
+    background: #0066cc;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background 0.3s;
+}
+
+.result-actions a:hover {
+    background: #004a99;
+}

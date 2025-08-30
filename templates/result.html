@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% block content %}
+<div class="exam-container">
+    <h1>{{ subject_chinese }}科 資優鑑定測驗 測驗結果</h1>
+    <p>你的分數：{{ score }} / {{ results|length }}</p>
+
+    <form>
+        {% for r in results %}
+        <div
+            class="question {% if r.is_correct %}correct{% else %}wrong{% endif %}"
+        >
+            <p>題目 {{ loop.index }}：</p>
+            <img
+                src="{{ url_for('static', path='questions/' + r.image) }}"
+                alt="題目 {{ loop.index }}"
+            />
+            <input
+                type="text"
+                value="{{ r.user_answer }}"
+                readonly
+                class="{% if r.is_correct %}correct-answer{% else %}wrong-answer{% endif %}"
+            />
+        </div>
+        {% endfor %}
+    </form>
+
+    <div class="result-actions">
+        <a href="/">回首頁</a>
+        <a href="/exam/{{ subject }}">重新考試</a>
+    </div>
+</div>
+{% endblock %}

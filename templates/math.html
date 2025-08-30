@@ -1,0 +1,23 @@
+{% extends "base.html" %} {% block content %}
+<div class="exam-container">
+    <h1>{{ subject_chinese }}科 資優鑑定測驗 練習試卷</h1>
+    <form method="post" action="/exam/submit/{{ subject }}">
+        {% for q in questions %}
+        <div class="question">
+            <p>題目 {{ loop.index }}：</p>
+            <img
+                src="{{ url_for('static', path='questions/' + q.image) }}"
+                alt="題目 {{ loop.index }}"
+            />
+            <input
+                type="text"
+                name="answer_{{ q.id }}"
+                placeholder="你的答案"
+                required
+            />
+        </div>
+        {% endfor %}
+        <button type="submit">已完成作答，點擊交卷</button>
+    </form>
+</div>
+{% endblock %}
