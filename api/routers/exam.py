@@ -1,12 +1,11 @@
 import random
 
-from database.database import questions_math_database, questions_science_database
-from routers.auth import get_current_user
-
-from fastapi import Request
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from fastapi import APIRouter
+
+from .auth import get_current_user
+from database.database import questions_math_database, questions_science_database
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -46,6 +45,7 @@ async def exam_page(request: Request, subject: str):
             "questions": selected,
             "subject": subject,
             "subject_chinese": subjects_dict[subject],
+            "user": user,
         },
     )
 
@@ -58,9 +58,13 @@ async def submit_exam(request: Request, subject: str):
     - 使用者必須登入才能提交考卷
     - 回傳結果頁面包含：答對題數、總題數、每題答對與否
     """
+    # Check if user is logged in
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/", status_code=302)
+
     # Get answer form
     form = await request.form()
-    print(form)
 
     # Check if user is logged in
     if subject == "math":
@@ -103,5 +107,6 @@ async def submit_exam(request: Request, subject: str):
             "subject": subject,
             "subject_chinese": subjects_dict[subject],
             "results": results,
+            "user": user,
         },
     )

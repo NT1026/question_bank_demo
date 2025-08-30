@@ -1,9 +1,8 @@
 import uuid
 
 from database.database import users
-from fastapi import Request, Form
+from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi import APIRouter
 
 router = APIRouter()
 
