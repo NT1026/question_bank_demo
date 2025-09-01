@@ -44,7 +44,7 @@ async def read_user(user_id: str = Depends(check_user_id)):
     response_model=list[UserSchema.UserRead],
     status_code=status.HTTP_200_OK,
 )
-async def read_users():
+async def read_all_users():
     """
     取得所有使用者資訊
     """

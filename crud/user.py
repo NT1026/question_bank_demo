@@ -26,10 +26,12 @@ class UserCrudManager:
             )
 
         # Create new user
-        newUser_dict = newUser.model_dump()
         user = UserModel(
-            **newUser_dict,
             id=str(uuid.uuid4()),
+            username=newUser.username,
+            password=newUser.password,
+            name=newUser.name,
+            role=newUser.role,
             created_at=datetime.now(),
         )
         db_session.add(user)

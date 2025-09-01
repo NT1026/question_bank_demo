@@ -42,7 +42,7 @@ async def read_question(question_id: str = Depends(check_question_id)):
     response_model=list[QuestionSchema.QuestionRead],
     status_code=status.HTTP_200_OK,
 )
-async def read_questions():
+async def read_all_questions():
     """
     取得所有題目
     """
@@ -67,7 +67,7 @@ async def read_questions_by_subject(subject: str):
     "/{question_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def delete_user(question_id: str = Depends(check_question_id)):
+async def delete_question(question_id: str = Depends(check_question_id)):
     """
     根據 question_id 刪除題目
     """

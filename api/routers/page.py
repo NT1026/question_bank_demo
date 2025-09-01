@@ -9,11 +9,16 @@ from database.database import questions_math_database, questions_science_databas
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
-
 subjects_dict = {"math": "數學", "science": "自然"}
 
 
-@router.get("/{subject}", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
+async def index_page(request: Request):
+    user = get_current_user(request)
+    return templates.TemplateResponse("index.html", {"request": request, "user": user})
+
+
+@router.get("/exam/{subject}", response_class=HTMLResponse)
 async def exam_page(request: Request, subject: str):
     """
     隨機出題 API
@@ -50,7 +55,7 @@ async def exam_page(request: Request, subject: str):
     )
 
 
-@router.post("/submit/{subject}", response_class=HTMLResponse)
+@router.post("/exam/submit/{subject}", response_class=HTMLResponse)
 async def submit_exam(request: Request, subject: str):
     """
     提交考卷 API

@@ -31,10 +31,11 @@ class QuestionCrudManager:
             )
 
         # Create new question
-        newQuestion_dict = newQuestion.model_dump()
         question = QuestionModel(
-            **newQuestion_dict,
             id=str(uuid.uuid4()),
+            subject=newQuestion.subject,
+            image_path=newQuestion.image_path,
+            answer=newQuestion.answer,
             created_at=datetime.now(),
         )
         db_session.add(question)

@@ -1,9 +1,11 @@
 from fastapi import HTTPException, status
 
 from crud.question import QuestionCrudManager
+from crud.record import RecordCrudManager
 from crud.user import UserCrudManager
 
 QuestionCrud = QuestionCrudManager()
+RecordCrud = RecordCrudManager()
 UserCrud = UserCrudManager()
 
 
@@ -25,5 +27,16 @@ async def check_question_id(question_id: str):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Question does not exist",
         )
-    
+
     return question_id
+
+
+async def check_record_id(record_id: str):
+    record = await RecordCrud.get(record_id)
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Record does not exist",
+        )
+
+    return record_id

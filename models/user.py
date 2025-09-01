@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, relationship
 
 from models.base import Base, BaseType
 
@@ -13,6 +13,14 @@ class User(Base):
     name: Mapped[BaseType.str_10]
     role: Mapped[BaseType.str_10]
     created_at: Mapped[BaseType.datetime]
+
+    # relationships to child
+    exam_records: Mapped[list["Record"]] = relationship(
+        "Record",
+        back_populates="user_info",
+        cascade="all, delete-orphan", 
+        passive_deletes=True
+    )
 
     def __init__(
         self,
