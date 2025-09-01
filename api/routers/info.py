@@ -1,14 +1,14 @@
 from fastapi import APIRouter
 
-from config import Settings
+from settings.configs import Settings
 
 router = APIRouter()
 settings = Settings()
 
 
-@router.get("/info")
+@router.get("")
 async def info():
     return {
-        "app_name": settings.app_name,
-        "host": settings.host,
+        "app_name": settings.APP_NAME,
+        "host": settings.HOST,
     }

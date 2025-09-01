@@ -1,0 +1,6 @@
+{
+    "app_name": "KCJH 國昌資優班 題庫練習系統",
+    "host": "127.0.0.1",
+    "port": 8080,
+    "api_key": "ThisIsASecretKey"
+}
