@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 
 from .depends import check_user_id
 from crud.user import UserCrudManager
@@ -10,7 +10,8 @@ UserCrud = UserCrudManager()
 
 @router.post(
     "",
-    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=UserSchema.UserRead,
+    status_code=status.HTTP_200_OK,
 )
 async def create_user(newUser: UserSchema.UserCreate):
     """
@@ -19,18 +20,10 @@ async def create_user(newUser: UserSchema.UserCreate):
     - password
     - name
     - role
-    - created_at
     """
-    if await UserCrud.get(newUser.username):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="User already exists",
-        )
-
     # newUser.password = get_password_hash(newUser.password)
-    await UserCrud.create(newUser)
-
-    return
+    user = await UserCrud.create(newUser)
+    return user
 
 
 @router.get(

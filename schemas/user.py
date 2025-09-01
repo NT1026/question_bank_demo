@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 
 from pydantic import BaseModel
 
@@ -8,7 +8,6 @@ class UserCreate(BaseModel):
     password: str
     name: str
     role: str
-    created_at: date
 
 
 class UserRead(BaseModel):
@@ -16,7 +15,7 @@ class UserRead(BaseModel):
     username: str
     name: str
     role: str
-    created_at: date
+    created_at: datetime
 
 
 class UserUpdate(BaseModel):

@@ -1,4 +1,6 @@
 import uuid
+from datetime import datetime
+from fastapi import HTTPException, status
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,8 +16,22 @@ class UserCrudManager:
         newUser: UserSchema.UserCreate,
         db_session: AsyncSession,
     ):
+        # Check if user with the same username already exists
+        stmt = select(UserModel).where(UserModel.username == newUser.username)
+        result = await db_session.execute(stmt)
+        exist = result.scalar_one_or_none()
+        if exist:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="User already exists"
+            )
+
+        # Create new user
         newUser_dict = newUser.model_dump()
-        user = UserModel(**newUser_dict, id=str(uuid.uuid4()))
+        user = UserModel(
+            **newUser_dict,
+            id=str(uuid.uuid4()),
+            created_at=datetime.now(),
+        )
         db_session.add(user)
         await db_session.commit()
 
@@ -28,9 +44,9 @@ class UserCrudManager:
     ):
         stmt = select(UserModel).where(UserModel.id == user_id)
         result = await db_session.execute(stmt)
-        user = result.first()
-        
-        return user[0] if user else None
+        user = result.scalar_one_or_none()
+
+        return user
 
     async def get_all(
         self,
@@ -38,7 +54,9 @@ class UserCrudManager:
     ):
         stmt = select(UserModel)
         result = await db_session.execute(stmt)
-        return result.scalars().all()
+        users = result.scalars().all()
+
+        return users
 
     async def update(
         self,

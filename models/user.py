@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy.orm import Mapped
 
 from models.base import Base, BaseType
@@ -20,7 +21,7 @@ class User(Base):
         password: str,
         name: str,
         role: str,
-        created_at,
+        created_at: datetime,
     ):
         self.id = id
         self.username = username

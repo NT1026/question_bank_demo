@@ -1,5 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy.dialects.mysql import JSON
 from sqlalchemy.orm import DeclarativeBase, mapped_column
 from typing import Annotated, Optional
 
@@ -21,3 +22,4 @@ class BaseType:
     ]
     datetime = Annotated[datetime, mapped_column(DateTime, nullable=True)]
     path = Annotated[str, mapped_column(String(1000), nullable=True)]
+    json_type = Annotated[dict, mapped_column(JSON)]

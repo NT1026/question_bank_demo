@@ -9,6 +9,7 @@ from .routers import (
     exam_router,
     index_router,
     info_router,
+    question_router,
     user_router,
 )
 
@@ -23,6 +24,7 @@ app.include_router(index_router, tags=["index.html"])
 app.include_router(info_router, prefix="/info", tags=["Info"])
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(user_router, prefix="/user", tags=["User"])
+app.include_router(question_router, prefix="/question", tags=["Question"])
 app.include_router(exam_router, prefix="/exam", tags=["Exam"])
 
 # CORS settings
