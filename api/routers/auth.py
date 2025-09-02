@@ -1,69 +1,47 @@
-import uuid
-
-from database.database import users
-from fastapi import APIRouter, Form, Request
+from datetime import datetime, timedelta
+from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 
+from auth.passwd import verify_password
+from crud.user import UserCrudManager
+
 router = APIRouter()
-
-# 測試 session
-sessions = {}  # key: session_id, value: username
-
-# 正式環境 session (redis)
-# TODO
-
-
-def get_current_user(request: Request):
-    """
-    取得目前登入的使用者 (非 API)
-    - 從 cookie 取得 session_id，並從 sessions 中取得使用者資訊
-    - 若無登入則回傳 None
-    """
-    session_id = request.cookies.get("session_id")
-    if session_id and session_id in sessions:
-        return sessions[session_id]
-    return None
+UserCrud = UserCrudManager()
 
 
 @router.post("/login")
-async def login(user_id: str = Form(...), password: str = Form(...)):
-    """
-    登入 API
-    - user_id: 使用者帳號 (身分證字號)
-    - password: 使用者密碼
-    - name: 使用者名稱
-    """
-    # Check if user exists
-    user = None
-    for u in users:
-        if u["user_id"] == user_id and u["password"] == password:
-            user = u
-            break
+async def login(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+):
+    # Check if user exists and password is correct
+    user = await UserCrud.get_by_username(username)
+    if not user or not verify_password(password, user.password):
+        return HTMLResponse(
+            "Login Failed",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
 
-    # Create session and set cookie
-    if user:
-        session_id = str(uuid.uuid4())
-        sessions[session_id] = user
-        resp = RedirectResponse("/", status_code=302)
-        resp.set_cookie(key="session_id", value=session_id)
+    # Create session
+    new_session = {
+        "user_id": user.id,
+        "token_expiry": (datetime.now() + timedelta(hours=1)).timestamp(),
+    }
+    request.session.update(new_session)
 
-        # Login successful
-        return resp
-
-    # Login failed
-    return HTMLResponse("登入失敗", status_code=401)
+    # Send session cookie to client
+    return RedirectResponse(
+        "/",
+        status_code=status.HTTP_302_FOUND,
+    )
 
 
 @router.get("/logout")
 async def logout(request: Request):
-    """
-    登出 API
-    - 主動清除 session 並刪除 cookie
-    - 重定向到 index.html
-    """
-    session_id = request.cookies.get("session_id")
-    if session_id and session_id in sessions:
-        del sessions[session_id]
-    resp = RedirectResponse("/", status_code=302)
-    resp.delete_cookie("session_id")
+    request.session.clear()
+    resp = RedirectResponse(
+        "/",
+        status_code=status.HTTP_302_FOUND,
+    )
     return resp

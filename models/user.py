@@ -8,8 +8,7 @@ class User(Base):
     __tablename__ = "User"
     id: Mapped[BaseType.uuid]
     username: Mapped[BaseType.str_10]
-    # password: Mapped[BaseType.hashed_password]
-    password: Mapped[BaseType.str_10]
+    password: Mapped[BaseType.hashed_password]
     name: Mapped[BaseType.str_10]
     role: Mapped[BaseType.str_10]
     created_at: Mapped[BaseType.datetime]

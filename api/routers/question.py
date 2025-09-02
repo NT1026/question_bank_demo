@@ -11,7 +11,7 @@ QuestionCrud = QuestionCrudManager()
 @router.post(
     "",
     response_model=QuestionSchema.QuestionRead,
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_question(newQuestion: QuestionSchema.QuestionCreate):
     """

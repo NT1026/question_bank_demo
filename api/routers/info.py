@@ -10,5 +10,5 @@ settings = Settings()
 async def info():
     return {
         "app_name": settings.APP_NAME,
-        "host": settings.HOST,
+        "host": settings.APP_HOST,
     }

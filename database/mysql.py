@@ -1,14 +1,14 @@
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy.schema import CreateTable, DropTable
-
 
 from models.base import Base
-from models.user import User
+from settings.configs import Settings
+
+settings = Settings()
 
 
 engine = create_async_engine(
-    url="mysql+aiomysql://root:password@localhost:8888/question_bank_system",
+    f"mysql+aiomysql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}",
     echo=True,
     pool_pre_ping=True,
 )

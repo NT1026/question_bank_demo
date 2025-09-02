@@ -9,7 +9,7 @@ class Question(Base):
     id: Mapped[BaseType.uuid]
     subject: Mapped[BaseType.str_10]
     image_path: Mapped[BaseType.path]
-    answer: Mapped[BaseType.json_type]
+    answer: Mapped[BaseType.str_10]
     created_at: Mapped[BaseType.datetime]
 
     def __init__(

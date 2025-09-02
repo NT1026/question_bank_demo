@@ -4,17 +4,20 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from .auth import get_current_user
 from database.database import questions_math_database, questions_science_database
+
+from auth.session import validate_session
+from crud.user import UserCrudManager
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
+UserCrud = UserCrudManager()
 subjects_dict = {"math": "數學", "science": "自然"}
 
 
 @router.get("/", response_class=HTMLResponse)
-async def index_page(request: Request):
-    user = get_current_user(request)
+async def index_page(request: Request): 
+    user = await UserCrud.get(request.session.get("user_id")) if validate_session(request) else None
     return templates.TemplateResponse("index.html", {"request": request, "user": user})
 
 
@@ -27,7 +30,7 @@ async def exam_page(request: Request, subject: str):
     - 使用者必須登入才能進入考試頁面
     """
     # Check if user is logged in
-    user = get_current_user(request)
+    user = validate_session(request)
     if not user:
         return RedirectResponse("/", status_code=302)
 
@@ -64,7 +67,7 @@ async def submit_exam(request: Request, subject: str):
     - 回傳結果頁面包含：答對題數、總題數、每題答對與否
     """
     # Check if user is logged in
-    user = get_current_user(request)
+    user = validate_session(request)
     if not user:
         return RedirectResponse("/", status_code=302)
 

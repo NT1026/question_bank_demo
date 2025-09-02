@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 
 from .depends import check_record_id, check_user_id
 from crud.record import RecordCrudManager
@@ -13,7 +13,7 @@ UserCrud = UserCrudManager()
 @router.post(
     "",
     response_model=RecordSchema.RecordRead,
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_record(
     newRecord: RecordSchema.RecordCreate,

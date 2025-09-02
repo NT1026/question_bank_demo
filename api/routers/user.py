@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
 from .depends import check_user_id
+from auth.passwd import get_password_hash
 from crud.user import UserCrudManager
 from schemas import user as UserSchema
 
@@ -11,7 +12,7 @@ UserCrud = UserCrudManager()
 @router.post(
     "",
     response_model=UserSchema.UserRead,
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_user(newUser: UserSchema.UserCreate):
     """
@@ -21,7 +22,7 @@ async def create_user(newUser: UserSchema.UserCreate):
     - name
     - role
     """
-    # newUser.password = get_password_hash(newUser.password)
+    newUser.password = get_password_hash(newUser.password)
     user = await UserCrud.create(newUser)
     return user
 

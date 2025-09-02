@@ -59,6 +59,17 @@ class UserCrudManager:
         users = result.scalars().all()
 
         return users
+    
+    async def get_by_username(
+        self,
+        username: str,
+        db_session: AsyncSession,
+    ):
+        stmt = select(UserModel).where(UserModel.username == username)
+        result = await db_session.execute(stmt)
+        user = result.scalar_one_or_none()
+
+        return user
 
     async def update(
         self,
