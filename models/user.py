@@ -10,7 +10,7 @@ class User(Base):
     id: Mapped[BaseType.uuid]
     username: Mapped[BaseType.str_10]
     password: Mapped[BaseType.hashed_password]
-    name: Mapped[BaseType.str_10]
+    name: Mapped[BaseType.str_20]
     role: Mapped[BaseType.str_10]
     created_at: Mapped[BaseType.datetime]
 

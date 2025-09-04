@@ -9,7 +9,7 @@ class Question(Base):
     __tablename__ = "Question"
     id: Mapped[BaseType.uuid]
     subject: Mapped[BaseType.str_20]
-    image_path: Mapped[BaseType.path]
+    image_path: Mapped[BaseType.str_1000]
     answer: Mapped[BaseType.str_10]
     created_at: Mapped[BaseType.datetime]
 

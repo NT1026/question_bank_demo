@@ -9,11 +9,10 @@ class UserAnswer(BaseModel):
 
 class ExamRecordBase(BaseModel):
     subject: str = Field(min_length=1, max_length=20)
+    user_answers: list[UserAnswer]
 
 
 class ExamRecordCreate(ExamRecordBase):
-    user_answers: list[UserAnswer]
-
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -39,5 +38,4 @@ class ExamRecordRead(ExamRecordBase):
     id: str
     user_id: str
     score: int
-    user_answers: list[UserAnswer]
     created_at: datetime

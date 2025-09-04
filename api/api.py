@@ -22,8 +22,8 @@ settings = Settings()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Routers
-app.include_router(page_router, tags=["Page"])
 app.include_router(info_router, prefix="/info", tags=["Info"])
+app.include_router(page_router, tags=["Page"])
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(user_router, prefix="/user", tags=["User"])
 app.include_router(question_router, prefix="/question", tags=["Question"])

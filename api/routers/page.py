@@ -1,7 +1,7 @@
 import random
 
 from fastapi import APIRouter, Depends, Request, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from .depends import (
@@ -9,7 +9,6 @@ from .depends import (
 )
 from crud.exam_record import ExamRecordCrudManager
 from crud.question import QuestionCrudManager
-from crud.user import UserCrudManager
 from schemas import exam_record as ExamRecordSchema
 
 router = APIRouter()
@@ -17,7 +16,6 @@ templates = Jinja2Templates(directory="templates")
 
 ExamRecordCrud = ExamRecordCrudManager()
 QuestionCrud = QuestionCrudManager()
-UserCrud = UserCrudManager()
 
 subjects_dict = {
     "math": "數學",
@@ -25,7 +23,10 @@ subjects_dict = {
 }
 
 
-@router.get("/", response_class=HTMLResponse)
+@router.get(
+    "/",
+    response_class=HTMLResponse,
+)
 async def index_page(
     request: Request,
     current_user=Depends(get_current_user),
@@ -54,7 +55,10 @@ async def index_page(
     )
 
 
-@router.get("/exam/{subject}", response_class=HTMLResponse)
+@router.get(
+    "/exam/{subject}",
+    response_class=HTMLResponse,
+)
 async def exam_page(
     request: Request,
     subject: str,
@@ -67,11 +71,9 @@ async def exam_page(
     """
     # If not logged in, redirect to index.html
     if not current_user:
-        return templates.TemplateResponse(
-            "index.html",
-            {
-                "request": request,
-            },
+        return RedirectResponse(
+            "/",
+            status_code=status.HTTP_302_FOUND,
         )
 
     # If logged in, check subject is valid (math or nature_science)
@@ -98,7 +100,10 @@ async def exam_page(
     )
 
 
-@router.post("/exam/submit/{subject}", response_class=HTMLResponse)
+@router.post(
+    "/exam/submit/{subject}",
+    response_class=HTMLResponse,
+)
 async def submit_exam(
     request: Request,
     subject: str,
@@ -111,11 +116,9 @@ async def submit_exam(
     """
     # If not logged in, redirect to index.html
     if not current_user:
-        return templates.TemplateResponse(
-            "index.html",
-            {
-                "request": request,
-            },
+        return RedirectResponse(
+            "/",
+            status_code=status.HTTP_302_FOUND,
         )
 
     # If logged in, check subject is valid (math or nature_science)

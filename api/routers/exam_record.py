@@ -10,27 +10,6 @@ ExamRecordCrud = ExamRecordCrudManager()
 UserCrud = UserCrudManager()
 
 
-@router.post(
-    "",
-    response_model=ExamRecordSchema.ExamRecordRead,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_exam_record(
-    newExamRecord: ExamRecordSchema.ExamRecordCreate,
-    user_id: str = Depends(check_user_id),
-):
-    """
-    用以下資訊新增一次測驗紀錄：
-    - subject
-    - user_answers (包含 question_id, user_answer 的 JSON 陣列)
-    """
-    exam_record = await ExamRecordCrud.create(
-        user_id=user_id,
-        newExamRecord=newExamRecord,
-    )
-    return exam_record
-
-
 @router.get(
     "/particular/{exam_record_id}",
     response_model=ExamRecordSchema.ExamRecordRead,
@@ -42,19 +21,6 @@ async def read_exam_record(exam_record_id: str = Depends(check_exam_record_id)):
     """
     exam_record = await ExamRecordCrud.get(exam_record_id)
     return exam_record
-
-
-@router.get(
-    "",
-    response_model=list[ExamRecordSchema.ExamRecordRead],
-    status_code=status.HTTP_200_OK,
-)
-async def read_all_exam_records():
-    """
-    取得所有測驗紀錄
-    """
-    exam_records = await ExamRecordCrud.get_all()
-    return exam_records
 
 
 @router.get(

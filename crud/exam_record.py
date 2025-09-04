@@ -76,16 +76,6 @@ class ExamRecordCrudManager:
 
         return exam_record
 
-    async def get_all(
-        self,
-        db_session: AsyncSession,
-    ):
-        stmt = select(ExamRecordModel)
-        result = await db_session.execute(stmt)
-        exam_records = result.scalars().all()
-
-        return exam_records
-
     async def get_by_user_id(
         self,
         user_id: str,

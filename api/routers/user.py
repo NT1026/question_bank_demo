@@ -28,19 +28,6 @@ async def create_user(newUser: UserSchema.UserCreate):
 
 
 @router.get(
-    "/{user_id}",
-    response_model=UserSchema.UserRead,
-    status_code=status.HTTP_200_OK,
-)
-async def read_user(user_id: str = Depends(check_user_id)):
-    """
-    根據 user_id 取得使用者資訊
-    """
-    user = await UserCrud.get(user_id)
-    return user
-
-
-@router.get(
     "",
     response_model=list[UserSchema.UserRead],
     status_code=status.HTTP_200_OK,
@@ -51,22 +38,6 @@ async def read_all_users():
     """
     users = await UserCrud.get_all()
     return users
-
-
-@router.put(
-    "/{user_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-async def update_user(
-    updateUser: UserSchema.UserUpdate,
-    user_id: str = Depends(check_user_id),
-):
-    """
-    更新使用者資訊：
-    - name
-    """
-    await UserCrud.update(user_id=user_id, updateUser=updateUser)
-    return
 
 
 @router.delete(

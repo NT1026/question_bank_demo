@@ -35,6 +35,16 @@ class UserCrudManager:
 
         return user
 
+    async def get_all(
+        self,
+        db_session: AsyncSession,
+    ):
+        stmt = select(UserModel)
+        result = await db_session.execute(stmt)
+        users = result.scalars().all()
+
+        return users
+
     async def get(
         self,
         user_id: str,
@@ -46,16 +56,6 @@ class UserCrudManager:
 
         return user
 
-    async def get_all(
-        self,
-        db_session: AsyncSession,
-    ):
-        stmt = select(UserModel)
-        result = await db_session.execute(stmt)
-        users = result.scalars().all()
-
-        return users
-
     async def get_by_username(
         self,
         username: str,
@@ -66,22 +66,6 @@ class UserCrudManager:
         user = result.scalar_one_or_none()
 
         return user
-
-    async def update(
-        self,
-        user_id: str,
-        updateUser: UserSchema.UserUpdate,
-        db_session: AsyncSession,
-    ):
-        updateUser_dict = updateUser.model_dump(exclude_none=True)
-        if updateUser_dict:
-            stmt = (
-                update(UserModel).where(UserModel.id == user_id).values(updateUser_dict)
-            )
-            await db_session.execute(stmt)
-            await db_session.commit()
-
-        return
 
     async def delete(
         self,

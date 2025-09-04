@@ -25,32 +25,6 @@ async def create_question(newQuestion: QuestionSchema.QuestionCreate):
 
 
 @router.get(
-    "/{question_id}",
-    response_model=QuestionSchema.QuestionRead,
-    status_code=status.HTTP_200_OK,
-)
-async def read_question(question_id: str = Depends(check_question_id)):
-    """
-    根據 question_id 取得題目
-    """
-    question = await QuestionCrud.get(question_id)
-    return question
-
-
-@router.get(
-    "",
-    response_model=list[QuestionSchema.QuestionRead],
-    status_code=status.HTTP_200_OK,
-)
-async def read_all_questions():
-    """
-    取得所有題目
-    """
-    questions = await QuestionCrud.get_all()
-    return questions
-
-
-@router.get(
     "/subject/{subject}",
     response_model=list[QuestionSchema.QuestionRead],
     status_code=status.HTTP_200_OK,

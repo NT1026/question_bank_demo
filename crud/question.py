@@ -16,9 +16,7 @@ class QuestionCrudManager:
     ):
         # Check if question already exists
         stmt = select(QuestionModel).where(
-            QuestionModel.subject == newQuestion.subject,
             QuestionModel.image_path == newQuestion.image_path,
-            QuestionModel.answer == newQuestion.answer,
         )
         result = await db_session.execute(stmt)
         exist = result.scalar_one_or_none()
@@ -49,16 +47,6 @@ class QuestionCrudManager:
         question = result.scalar_one_or_none()
 
         return question
-
-    async def get_all(
-        self,
-        db_session: AsyncSession,
-    ):
-        stmt = select(QuestionModel)
-        result = await db_session.execute(stmt)
-        questions = result.scalars().all()
-
-        return questions
 
     async def get_by_subject(
         self,
