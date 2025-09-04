@@ -2,11 +2,14 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
-class UserCreate(BaseModel):
+class UserBase(BaseModel):
     username: str = Field(min_length=1, max_length=10)
-    password: str = Field(min_length=1, max_length=20)
     name: str = Field(min_length=1, max_length=10)
     role: str = Field(min_length=1, max_length=10)
+
+
+class UserCreate(UserBase):
+    password: str = Field(min_length=1, max_length=20)
 
     model_config = {
         "json_schema_extra": {
@@ -22,11 +25,8 @@ class UserCreate(BaseModel):
     }
 
 
-class UserRead(BaseModel):
+class UserRead(UserBase):
     id: str
-    username: str
-    name: str
-    role: str
     created_at: datetime
 
 

@@ -2,16 +2,16 @@
 <div class="exam-container">
     <h1>{{ subject_chinese }}科 資優鑑定測驗 練習試卷</h1>
     <form method="post" action="/exam/submit/{{ subject }}">
-        {% for q in questions %}
+        {% for question in questions %}
         <div class="question">
             <p>題目 {{ loop.index }}：</p>
             <img
-                src="{{ url_for('static', path='questions/' + q.image) }}"
+                src="{{ url_for('static', path=question.image_path) }}"
                 alt="題目 {{ loop.index }}"
             />
             <input
                 type="text"
-                name="answer_{{ q.id }}"
+                name="{{ question.id }}"
                 placeholder="你的答案"
                 required
             />

@@ -1,5 +1,3 @@
-import uuid
-from datetime import datetime
 from fastapi import HTTPException, status
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -32,11 +30,9 @@ class QuestionCrudManager:
 
         # Create new question
         question = QuestionModel(
-            id=str(uuid.uuid4()),
             subject=newQuestion.subject,
             image_path=newQuestion.image_path,
             answer=newQuestion.answer,
-            created_at=datetime.now(),
         )
         db_session.add(question)
         await db_session.commit()

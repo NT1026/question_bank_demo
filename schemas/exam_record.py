@@ -2,43 +2,42 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
-class UserAnswerCreate(BaseModel):
+class UserAnswer(BaseModel):
     question_id: str
     user_answer: str
-    answer: str
 
 
-class RecordCreate(BaseModel):
-    subject: str = Field(min_length=1, max_length=10)
-    user_answers: list[UserAnswerCreate]
+class ExamRecordBase(BaseModel):
+    subject: str = Field(min_length=1, max_length=20)
+
+
+class ExamRecordCreate(ExamRecordBase):
+    user_answers: list[UserAnswer]
 
     model_config = {
         "json_schema_extra": {
             "examples": [
-                { 
+                {
                     "subject": "math",
                     "user_answers": [
                         {
                             "question_id": "question-uuid-1",
                             "user_answer": "1",
-                            "answer": "1"
                         },
                         {
                             "question_id": "question-uuid-2",
                             "user_answer": "1",
-                            "answer": "2"
-                        }
-                    ]
+                        },
+                    ],
                 }
             ]
         }
     }
 
 
-class RecordRead(BaseModel):
+class ExamRecordRead(ExamRecordBase):
     id: str
     user_id: str
-    subject: str
     score: int
-    user_answers: list[UserAnswerCreate]
+    user_answers: list[UserAnswer]
     created_at: datetime

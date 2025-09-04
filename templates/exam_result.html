@@ -1,23 +1,23 @@
 {% extends "base.html" %} {% block content %}
 <div class="exam-container">
     <h1>{{ subject_chinese }}科 資優鑑定測驗 測驗結果</h1>
-    <p>你的分數：{{ score }} / {{ results|length }}</p>
+    <p>你的分數：{{ score }} / {{ user_answers | length }}</p>
 
     <form>
-        {% for r in results %}
+        {% for question in user_answers %}
         <div
-            class="question {% if r.is_correct %}correct{% else %}wrong{% endif %}"
+            class="question {% if question.is_correct %} correct {% else %} wrong {% endif %}"
         >
             <p>題目 {{ loop.index }}：</p>
             <img
-                src="{{ url_for('static', path='questions/' + r.image) }}"
+                src="{{ url_for('static', path=question.image_path) }}"
                 alt="題目 {{ loop.index }}"
             />
             <input
                 type="text"
-                value="{{ r.user_answer }}"
+                value="{{ question.user_answer }}"
                 readonly
-                class="{% if r.is_correct %}correct-answer{% else %}wrong-answer{% endif %}"
+                class="{% if question.is_correct %} correct-answer {% else %} wrong-answer {% endif %}"
             />
         </div>
         {% endfor %}

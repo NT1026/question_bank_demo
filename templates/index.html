@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block content %} {% if not user %}
+{% extends "base.html" %} {% block content %}
 <div class="login-container">
     <h2>登入題庫網站</h2>
     <form id="loginForm" action="/auth/login" method="post">
@@ -15,15 +15,4 @@
         </div>
     </form>
 </div>
-{% else %}
-<div class="student-info">
-    <h2>學生個人資訊</h2>
-    <p>學生名稱：{{ user.name }}</p>
-    <p>身分證字號：{{ user.username }}</p>
-</div>
-<div class="exam-selection">
-    <h2>開始測驗</h2>
-    <a href="/exam/math">數學</a>
-    <a href="/exam/science">自然</a>
-</div>
-{% endif %} {% endblock %}
+{% endblock %}

@@ -1,120 +1,155 @@
 import random
 
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Depends, Request, status
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from database.database import questions_math_database, questions_science_database
-
-from auth.session import validate_session
+from .depends import (
+    get_current_user,
+)
+from crud.exam_record import ExamRecordCrudManager
+from crud.question import QuestionCrudManager
 from crud.user import UserCrudManager
+from schemas import exam_record as ExamRecordSchema
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
+
+ExamRecordCrud = ExamRecordCrudManager()
+QuestionCrud = QuestionCrudManager()
 UserCrud = UserCrudManager()
-subjects_dict = {"math": "數學", "science": "自然"}
+
+subjects_dict = {
+    "math": "數學",
+    "nature_science": "自然",
+}
 
 
 @router.get("/", response_class=HTMLResponse)
-async def index_page(request: Request): 
-    user = await UserCrud.get(request.session.get("user_id")) if validate_session(request) else None
-    return templates.TemplateResponse("index.html", {"request": request, "user": user})
+async def index_page(
+    request: Request,
+    current_user=Depends(get_current_user),
+):
+    """
+    首頁 API
+    - 未登入使用者可瀏覽首頁，但無法進入考試頁面
+    - 已登入使用者可瀏覽首頁，並可進入考試頁面
+    """
+    # If not logged in, show index.html
+    if not current_user:
+        return templates.TemplateResponse(
+            "index.html",
+            {
+                "request": request,
+            },
+        )
+
+    # If logged in, show dashboard.html
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {
+            "request": request,
+            "current_user": current_user,
+        },
+    )
 
 
 @router.get("/exam/{subject}", response_class=HTMLResponse)
-async def exam_page(request: Request, subject: str):
+async def exam_page(
+    request: Request,
+    subject: str,
+    current_user=Depends(get_current_user),
+):
     """
-    隨機出題 API
-    - 分為數學、自然兩個科目
-    - 每次隨機從題庫中抽取 30 題
-    - 使用者必須登入才能進入考試頁面
+    測驗 API
+    - 未登入使用者無法進入考試頁面，會被導向首頁
+    - 已登入使用者可進入考試頁面
     """
-    # Check if user is logged in
-    user = validate_session(request)
-    if not user:
-        return RedirectResponse("/", status_code=302)
+    # If not logged in, redirect to index.html
+    if not current_user:
+        return templates.TemplateResponse(
+            "index.html",
+            {
+                "request": request,
+            },
+        )
 
-    # Select subject
-    if subject == "math":
-        questions = questions_math_database
-    elif subject == "science":
-        questions = questions_science_database
-    else:
-        return HTMLResponse("科目不存在", status_code=404)
+    # If logged in, check subject is valid (math or nature_science)
+    if subject not in subjects_dict:
+        return HTMLResponse(
+            "該科目測驗不存在",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
 
-    # Randomly select 30 questions
-    selected = random.sample(questions, min(30, len(questions)))
+    # Get 30 random questions from database
+    questions = await QuestionCrud.get_by_subject(subject)
+    selected_quesions = random.sample(questions, min(30, len(questions)))
 
-    # Render exam page
+    # Show exam.html
     return templates.TemplateResponse(
-        "math.html",
+        "exam.html",
         {
             "request": request,
-            "questions": selected,
+            "current_user": current_user,
             "subject": subject,
             "subject_chinese": subjects_dict[subject],
-            "user": user,
+            "questions": selected_quesions,
         },
     )
 
 
 @router.post("/exam/submit/{subject}", response_class=HTMLResponse)
-async def submit_exam(request: Request, subject: str):
+async def submit_exam(
+    request: Request,
+    subject: str,
+    current_user=Depends(get_current_user),
+):
     """
     提交考卷 API
-    - 計算分數並回傳結果頁面
-    - 使用者必須登入才能提交考卷
-    - 回傳結果頁面包含：答對題數、總題數、每題答對與否
+    - 未登入使用者無法提交考卷，會被導向首頁
+    - 已登入使用者可提交考卷，並計算分數與答題結果
     """
-    # Check if user is logged in
-    user = validate_session(request)
-    if not user:
-        return RedirectResponse("/", status_code=302)
-
-    # Get answer form
-    form = await request.form()
-
-    # Check if user is logged in
-    if subject == "math":
-        questions = questions_math_database
-    elif subject == "science":
-        questions = questions_science_database
-    else:
-        return HTMLResponse("科目不存在", status_code=404)
-
-    # Calculate score
-    score = 0
-    results = []
-    for q in questions:
-        correct_answer = q["answer"]
-        user_answer = form.get(f"answer_{q['id']}")
-        user_answer = user_answer.strip() if user_answer else ""
-
-        is_correct = user_answer in ["1", "2", "3", "4"] and user_answer.strip() == str(
-            correct_answer
-        )
-        if is_correct:
-            score += 1
-
-        results.append(
+    # If not logged in, redirect to index.html
+    if not current_user:
+        return templates.TemplateResponse(
+            "index.html",
             {
-                "id": q["id"],
-                "image": q["image"],
-                "user_answer": user_answer,
-                "correct_answer": correct_answer,
-                "is_correct": is_correct,
-            }
+                "request": request,
+            },
         )
 
-    # Render result page
+    # If logged in, check subject is valid (math or nature_science)
+    if subject not in subjects_dict:
+        return HTMLResponse(
+            "該科目測驗不存在",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+
+    # Get user_answer list
+    form = await request.form()
+    user_answers = [{"question_id": k, "user_answer": v} for k, v in dict(form).items()]
+
+    # Create new exam record into database
+    new_exam_record = ExamRecordSchema.ExamRecordCreate(
+        subject=subject, user_answers=user_answers
+    )
+    exam_record = await ExamRecordCrud.create(
+        user_id=current_user.id,
+        newExamRecord=new_exam_record,
+    )
+
+    # Get data for rendering
+    render_data = await ExamRecordCrud.get_render(exam_record)
+
+    # Render exam_result.html
     return templates.TemplateResponse(
-        "result.html",
+        "exam_result.html",
         {
             "request": request,
-            "score": score,
+            "current_user": current_user,
             "subject": subject,
             "subject_chinese": subjects_dict[subject],
-            "results": results,
-            "user": user,
+            "score": render_data["score"],
+            "user_answers": render_data["user_answers"],
         },
     )

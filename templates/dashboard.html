@@ -1,0 +1,12 @@
+{% extends "base.html" %} {% block content %}
+<div class="student-info">
+    <h2>學生個人資訊</h2>
+    <p>學生名稱：{{ current_user.name }}</p>
+    <p>身分證字號：{{ current_user.username }}</p>
+</div>
+<div class="exam-selection">
+    <h2>開始測驗</h2>
+    <a href="/exam/math">數學</a>
+    <a href="/exam/nature_science">自然</a>
+</div>
+{% endblock %}

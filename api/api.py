@@ -8,10 +8,10 @@ from uvicorn import Config, Server
 from settings.configs import Settings
 from .routers import (
     auth_router,
+    exam_record_router,
     info_router,
     page_router,
     question_router,
-    record_router,
     user_router,
 )
 
@@ -27,7 +27,7 @@ app.include_router(info_router, prefix="/info", tags=["Info"])
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(user_router, prefix="/user", tags=["User"])
 app.include_router(question_router, prefix="/question", tags=["Question"])
-app.include_router(record_router, prefix="/record", tags=["Record"])
+app.include_router(exam_record_router, prefix="/exam_record", tags=["Exam Record"])
 
 # CORS settings
 origins = ["http://127.0.0.1"]  # domain name
@@ -49,17 +49,17 @@ app.add_middleware(
 
 
 # Middleware
-@app.middleware("http")
-async def middleware_1(request: Request, call_next):
-    try:
-        response = await call_next(request)
-        return response
-    except Exception as e:
-        print(e)
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Internal Server Error"},
-        )
+# @app.middleware("http")
+# async def middleware_1(request: Request, call_next):
+#     try:
+#         response = await call_next(request)
+#         return response
+#     except Exception as e:
+#         print(e)
+#         return JSONResponse(
+#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             content={"detail": "Internal Server Error"},
+#         )
 
 
 # Run FastAPI with Uvicorn

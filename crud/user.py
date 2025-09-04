@@ -1,5 +1,3 @@
-import uuid
-from datetime import datetime
 from fastapi import HTTPException, status
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,12 +25,10 @@ class UserCrudManager:
 
         # Create new user
         user = UserModel(
-            id=str(uuid.uuid4()),
             username=newUser.username,
             password=newUser.password,
             name=newUser.name,
             role=newUser.role,
-            created_at=datetime.now(),
         )
         db_session.add(user)
         await db_session.commit()
@@ -59,7 +55,7 @@ class UserCrudManager:
         users = result.scalars().all()
 
         return users
-    
+
     async def get_by_username(
         self,
         username: str,
