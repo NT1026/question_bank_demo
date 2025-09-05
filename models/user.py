@@ -28,13 +28,15 @@ class User(Base):
         password: str,
         name: str,
         role: str,
+        id: str = str(uuid4()),
+        created_at: datetime = datetime.now(),
     ):
-        self.id = str(uuid4())
+        self.id = id
         self.username = username
         self.password = password
         self.name = name
         self.role = role
-        self.created_at = datetime.now()
+        self.created_at = created_at
 
     def __repr__(self):
         return f"User(id={self.id}, username={self.username}, password={self.password}, name={self.name}, role={self.role}, created_at={self.created_at})"

@@ -1,5 +1,4 @@
-from fastapi import HTTPException, status
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.mysql import crud_class_decorator
@@ -14,16 +13,6 @@ class UserCrudManager:
         newUser: UserSchema.UserCreate,
         db_session: AsyncSession,
     ):
-        # Check if user with the same username already exists
-        stmt = select(UserModel).where(UserModel.username == newUser.username)
-        result = await db_session.execute(stmt)
-        exist = result.scalar_one_or_none()
-        if exist:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="User already exists"
-            )
-
-        # Create new user
         user = UserModel(
             username=newUser.username,
             password=newUser.password,

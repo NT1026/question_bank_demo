@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from .depends import (
     get_current_user,
 )
+from auth.image import generate_image_token
 from crud.exam_record import ExamRecordCrudManager
 from crud.question import QuestionCrudManager
 from schemas import exam_record as ExamRecordSchema
@@ -87,6 +88,10 @@ async def exam_page(
     questions = await QuestionCrud.get_by_subject(subject)
     selected_quesions = random.sample(questions, min(30, len(questions)))
 
+    # Generate image token for each question
+    for question in selected_quesions:
+        question.token = generate_image_token(str(current_user.id), question.id)
+
     # Show exam.html
     return templates.TemplateResponse(
         "exam.html",
@@ -141,8 +146,29 @@ async def submit_exam(
         newExamRecord=new_exam_record,
     )
 
-    # Get data for rendering
-    render_data = await ExamRecordCrud.get_render(exam_record)
+    # Rendering data
+    rendered_user_answers = []
+    for item in exam_record.user_answers:
+        question = await QuestionCrud.get(item["question_id"])
+        if question:
+            rendered_user_answers.append(
+                {
+                    "question_id": item["question_id"],
+                    "image_path": question.image_path,
+                    "answer": question.answer,
+                    "user_answer": item["user_answer"],
+                    "is_correct": question.answer == item["user_answer"],
+                    "token": generate_image_token(str(current_user.id), question.id),
+                }
+            )
+    render_data = {
+        "id": exam_record.id,
+        "user_id": exam_record.user_id,
+        "subject": exam_record.subject,
+        "score": exam_record.score,
+        "user_answers": rendered_user_answers,
+        "created_at": exam_record.created_at,
+    }
 
     # Render exam_result.html
     return templates.TemplateResponse(

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from .depends import check_user_id
 from auth.passwd import get_password_hash
@@ -22,6 +22,15 @@ async def create_user(newUser: UserSchema.UserCreate):
     - name
     - role
     """
+    # Check if user with the same username already exists
+    exist = await UserCrud.get_by_username(newUser.username)
+    if exist:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User already exists",
+        )
+
+    # Create new user
     newUser.password = get_password_hash(newUser.password)
     user = await UserCrud.create(newUser)
     return user

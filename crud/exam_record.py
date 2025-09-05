@@ -36,35 +36,6 @@ class ExamRecordCrudManager:
 
         return exam_record
 
-    async def get_render(
-        self,
-        exam_record: ExamRecordModel,
-        db_session: AsyncSession,
-    ):
-        rendered_user_answers = []
-        for item in exam_record.user_answers:
-            question = await QuestionCrud.get(item["question_id"])
-            if question:
-                rendered_user_answers.append(
-                    {
-                        "question_id": item["question_id"],
-                        "image_path": question.image_path,
-                        "answer": question.answer,
-                        "user_answer": item["user_answer"],
-                        "is_correct": question.answer == item["user_answer"],
-                    }
-                )
-        render_result = {
-            "id": exam_record.id,
-            "user_id": exam_record.user_id,
-            "subject": exam_record.subject,
-            "score": exam_record.score,
-            "user_answers": rendered_user_answers,
-            "created_at": exam_record.created_at,
-        }
-
-        return render_result
-
     async def get(
         self,
         exam_record_id: str,

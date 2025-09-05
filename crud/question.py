@@ -1,36 +1,25 @@
-from fastapi import HTTPException, status
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.mysql import crud_class_decorator
 from models.question import Question as QuestionModel
-from schemas import question as QuestionSchema
 
 
 @crud_class_decorator
 class QuestionCrudManager:
     async def create(
         self,
-        newQuestion: QuestionSchema.QuestionCreate,
+        id: str,
+        subject: str,
+        image_path: str,
+        answer: str,
         db_session: AsyncSession,
     ):
-        # Check if question already exists
-        stmt = select(QuestionModel).where(
-            QuestionModel.image_path == newQuestion.image_path,
-        )
-        result = await db_session.execute(stmt)
-        exist = result.scalar_one_or_none()
-        if exist:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Question already exists",
-            )
-
-        # Create new question
         question = QuestionModel(
-            subject=newQuestion.subject,
-            image_path=newQuestion.image_path,
-            answer=newQuestion.answer,
+            id=id,
+            subject=subject,
+            image_path=image_path,
+            answer=answer,
         )
         db_session.add(question)
         await db_session.commit()

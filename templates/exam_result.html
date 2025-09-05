@@ -4,20 +4,20 @@
     <p>你的分數：{{ score }} / {{ user_answers | length }}</p>
 
     <form>
-        {% for question in user_answers %}
+        {% for q in user_answers %}
         <div
-            class="question {% if question.is_correct %} correct {% else %} wrong {% endif %}"
+            class="q {% if q.is_correct %} correct {% else %} wrong {% endif %}"
         >
             <p>題目 {{ loop.index }}：</p>
             <img
-                src="{{ url_for('static', path=question.image_path) }}"
+                src="{{ url_for('get_question_image', question_id=q.question_id) }}?token={{ q.token }}"
                 alt="題目 {{ loop.index }}"
             />
             <input
                 type="text"
-                value="{{ question.user_answer }}"
+                value="{{ q.user_answer }}"
                 readonly
-                class="{% if question.is_correct %} correct-answer {% else %} wrong-answer {% endif %}"
+                class="{% if q.is_correct %} correct-answer {% else %} wrong-answer {% endif %}"
             />
         </div>
         {% endfor %}

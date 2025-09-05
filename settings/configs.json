@@ -2,8 +2,7 @@
     "app": {
         "name": "KCJH 國昌資優班 題庫練習系統",
         "host": "127.0.0.1",
-        "port": 8080,
-        "api_key": "ThisIsASecretKey"
+        "port": 8080
     },
     "mysql": {
         "host": "127.0.0.1",
@@ -12,7 +11,13 @@
         "password": "password",
         "db_name": "question_bank_system"
     },
-    "session": {
-        "secret_key": "ThisIsAnotherSecretKey"
+    "secret_keys": {
+        "session": "SessionSecretKey",
+        "image": "ImageSecretKey"
+    },
+    "paths": {
+        "protected_img_dir": "/Users/nt1026/Documents/KCJH/question_bank_demo/question_images",
+        "math_dirname": "math",
+        "nature_science_dirname": "nature_science"
     }
 }

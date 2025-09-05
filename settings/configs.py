@@ -10,7 +10,6 @@ class Settings:
         self.APP_NAME = self.configs["app"]["name"]
         self.APP_HOST = self.configs["app"]["host"]
         self.APP_PORT = self.configs["app"]["port"]
-        self.API_KEY = self.configs["app"]["api_key"]
 
         # Database settings
         self.DB_HOST = self.configs["mysql"]["host"]
@@ -19,5 +18,11 @@ class Settings:
         self.DB_PASSWORD = self.configs["mysql"]["password"]
         self.DB_NAME = self.configs["mysql"]["db_name"]
 
-        # Session settings
-        self.SESSION_SECRET_KEY = self.configs["session"]["secret_key"]
+        # Secret keys settings
+        self.SESSION_SECRET_KEY = self.configs["secret_keys"]["session"]
+        self.IMAGE_SECRET_KEY = self.configs["secret_keys"]["image"]
+
+        # Paths settings
+        self.PROTECTED_IMG_DIR = self.configs["paths"]["protected_img_dir"]
+        self.MATH_DIRNAME = self.configs["paths"]["math_dirname"]
+        self.NATURE_SCIENCE_DIRNAME = self.configs["paths"]["nature_science_dirname"]
