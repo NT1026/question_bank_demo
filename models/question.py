@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped
 from uuid import uuid4
 
 from models.base import Base, BaseType
@@ -18,14 +18,13 @@ class Question(Base):
         subject: str,
         image_path: str,
         answer: str,
-        id: str = str(uuid4()),
-        created_at: datetime = datetime.now(),
+        id: str = None,
     ):
-        self.id = id
+        self.id = id or str(uuid4())
         self.subject = subject
         self.image_path = image_path
         self.answer = answer
-        self.created_at = created_at
+        self.created_at = datetime.now()
 
     def __repr__(self):
         return f"Question(id={self.id}, subject={self.subject}, image_path={self.image_path}, answer={self.answer}, created_at={self.created_at})"

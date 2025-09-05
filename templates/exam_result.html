@@ -6,7 +6,7 @@
     <form>
         {% for q in user_answers %}
         <div
-            class="q {% if q.is_correct %} correct {% else %} wrong {% endif %}"
+            class="question {% if q.is_correct %}correct{% else %}wrong{% endif %}"
         >
             <p>題目 {{ loop.index }}：</p>
             <img
@@ -17,7 +17,7 @@
                 type="text"
                 value="{{ q.user_answer }}"
                 readonly
-                class="{% if q.is_correct %} correct-answer {% else %} wrong-answer {% endif %}"
+                class="{% if q.is_correct %}correct-answer{% else %}wrong-answer{% endif %}"
             />
         </div>
         {% endfor %}

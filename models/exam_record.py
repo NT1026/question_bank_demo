@@ -31,17 +31,15 @@ class ExamRecord(Base):
         subject: str,
         score: int,
         user_answers: list[UserAnswer],
-        id=str(uuid4()),
-        created_at: datetime = datetime.now(),
     ):
-        self.id = id
+        self.id = str(uuid4())
         self.user_id = user_id
         self.subject = subject
         self.score = score
         self.user_answers = (
             [item.model_dump() for item in user_answers] if user_answers else []
         )
-        self.created_at = created_at
+        self.created_at = datetime.now()
 
     def __repr__(self):
         return f"ExamRecord(id={self.id}, user_id={self.user_id}, subject={self.subject}, score={self.score}, user_answers={self.user_answers}, created_at={self.created_at})"
