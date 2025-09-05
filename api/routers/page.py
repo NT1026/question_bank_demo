@@ -18,9 +18,35 @@ templates = Jinja2Templates(directory="templates")
 ExamRecordCrud = ExamRecordCrudManager()
 QuestionCrud = QuestionCrudManager()
 
-subjects_dict = {
-    "math": "數學",
-    "nature_science": "自然",
+subject_dict = {
+    "math_achievement": {
+        "name": "math_achievement",
+        "chinese_name": "數學成就測驗",
+        "subject": "math",
+        "question_count": 30,
+        "time_limit": 10,
+    },
+    "nature_science_achievement": {
+        "name": "nature_science_achievement",
+        "chinese_name": "自然成就測驗",
+        "subject": "nature_science",
+        "question_count": 38,
+        "time_limit": 76 * 60,
+    },
+    "math_aptitude": {
+        "name": "math_aptitude",
+        "chinese_name": "數學性向測驗",
+        "subject": "math",
+        "question_count": 20,
+        "time_limit": 40 * 60,
+    },
+    "nature_science_aptitude": {
+        "name": "nature_science_aptitude",
+        "chinese_name": "自然性向測驗",
+        "subject": "nature_science",
+        "question_count": 50,
+        "time_limit": 100 * 60,
+    },
 }
 
 
@@ -57,12 +83,12 @@ async def index_page(
 
 
 @router.get(
-    "/exam/{subject}",
+    "/exam/{subject_type}",
     response_class=HTMLResponse,
 )
 async def exam_page(
     request: Request,
-    subject: str,
+    subject_type: str,
     current_user=Depends(get_current_user),
 ):
     """
@@ -78,15 +104,18 @@ async def exam_page(
         )
 
     # If logged in, check subject is valid (math or nature_science)
-    if subject not in subjects_dict:
+    if subject_type not in subject_dict:
         return HTMLResponse(
             "該科目測驗不存在",
             status_code=status.HTTP_404_NOT_FOUND,
         )
 
     # Get 30 random questions from database
+    subject = subject_dict[subject_type]["subject"]
     questions = await QuestionCrud.get_by_subject(subject)
-    selected_quesions = random.sample(questions, min(30, len(questions)))
+
+    question_num = subject_dict[subject_type]["question_count"]
+    selected_quesions = random.sample(questions, min(question_num, len(questions)))
 
     # Generate image token for each question
     for question in selected_quesions:
@@ -98,20 +127,19 @@ async def exam_page(
         {
             "request": request,
             "current_user": current_user,
-            "subject": subject,
-            "subject_chinese": subjects_dict[subject],
+            "subject": subject_dict[subject_type],
             "questions": selected_quesions,
         },
     )
 
 
 @router.post(
-    "/exam/submit/{subject}",
+    "/exam/submit/{subject_type}",
     response_class=HTMLResponse,
 )
 async def submit_exam(
     request: Request,
-    subject: str,
+    subject_type: str,
     current_user=Depends(get_current_user),
 ):
     """
@@ -127,7 +155,7 @@ async def submit_exam(
         )
 
     # If logged in, check subject is valid (math or nature_science)
-    if subject not in subjects_dict:
+    if subject_type not in subject_dict:
         return HTMLResponse(
             "該科目測驗不存在",
             status_code=status.HTTP_404_NOT_FOUND,
@@ -153,6 +181,7 @@ async def submit_exam(
                 )
 
     # Create new exam record into database
+    subject = subject_dict[subject_type]["subject"]
     new_exam_record = ExamRecordSchema.ExamRecordCreate(
         subject=subject, user_answers=user_answers
     )
@@ -176,14 +205,6 @@ async def submit_exam(
                     "token": generate_image_token(str(current_user.id), question.id),
                 }
             )
-    render_data = {
-        "id": exam_record.id,
-        "user_id": exam_record.user_id,
-        "subject": exam_record.subject,
-        "score": exam_record.score,
-        "user_answers": rendered_user_answers,
-        "created_at": exam_record.created_at,
-    }
 
     # Render exam_result.html
     return templates.TemplateResponse(
@@ -191,9 +212,8 @@ async def submit_exam(
         {
             "request": request,
             "current_user": current_user,
-            "subject": subject,
-            "subject_chinese": subjects_dict[subject],
-            "score": render_data["score"],
-            "user_answers": render_data["user_answers"],
+            "subject": subject_dict[subject_type],
+            "score": exam_record.score,
+            "user_answers": rendered_user_answers,
         },
     )

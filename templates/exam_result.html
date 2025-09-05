@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block content %}
 <div class="exam-container">
-    <h1>{{ subject_chinese }}科 資優鑑定測驗 測驗結果</h1>
+    <h1>{{ subject.chinese_name }} 測驗結果</h1>
     <p>你的分數：{{ score }} / {{ user_answers | length }}</p>
 
     <form>
@@ -25,7 +25,7 @@
 
     <div class="result-actions">
         <a href="/">回首頁</a>
-        <a href="/exam/{{ subject }}">重新考試</a>
+        <a href="/exam/{{ subject.name }}">重新考試</a>
     </div>
 </div>
 {% endblock %}

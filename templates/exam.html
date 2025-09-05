@@ -1,7 +1,8 @@
 {% extends "base.html" %} {% block content %}
 <div class="exam-container">
-    <h1>{{ subject_chinese }}科 資優鑑定測驗 練習試卷</h1>
-    <form method="post" action="/exam/submit/{{ subject }}">
+    <h1>{{ subject.chinese_name }} 練習試卷</h1>
+    <div id="timer">測驗開始！</div>
+    <form id="examForm" method="post" action="/exam/submit/{{ subject.name }}">
         {% for q in questions %}
         <div class="question">
             <p>題目 {{ loop.index }}：</p>
@@ -13,8 +14,8 @@
                 type="text"
                 name="{{ q.id }}"
                 placeholder="你的答案"
-                pattern="[ABCD]{1,4}" 
-                title="答案只能是大寫 A、B、C、D 的組合" 
+                pattern="[ABCD]{1,4}"
+                title="答案只能是大寫 A、B、C、D 的組合"
                 required
             />
         </div>
@@ -25,4 +26,25 @@
         <a href="/">回首頁</a>
     </div>
 </div>
+
+<script>
+    let timeLeft = "{{ subject.time_limit }}";
+    const timerEl = document.getElementById("timer");
+
+    const countdown = setInterval(() => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerEl.textContent = `${minutes}:${seconds
+            .toString()
+            .padStart(2, "0")}`;
+        if (timeLeft < 300) {
+            timerEl.style.color = 'red';
+        }
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            document.getElementById("examForm").submit();
+        }
+        timeLeft--;
+    }, 1000);
+</script>
 {% endblock %}
