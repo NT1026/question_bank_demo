@@ -41,8 +41,8 @@ async def create_question(
     - answer
     """
     # Check answer format is valid
-    answer = answer.upper()
-    if not answer or not all(c in "ABCD" for c in answer) or len(answer) > 4:
+    sorted_answer = "".join(sorted(list(item for item in answer.upper())))
+    if not sorted_answer or not all(c in "ABCD" for c in sorted_answer) or len(sorted_answer) > 4:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Answer must be combination of A/B/C/D, 1~4 characters",
@@ -79,7 +79,7 @@ async def create_question(
             id=question_id,
             subject=subject,
             image_path=str(image_path),
-            answer=answer,
+            answer=sorted_answer,
         )
 
         return question
@@ -151,7 +151,7 @@ async def get_question_image(
     if not question:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Question not found",
+            detail="Question image not found",
         )
 
     return FileResponse(question.image_path, media_type="image/jpeg")

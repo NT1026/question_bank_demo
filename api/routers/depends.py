@@ -35,17 +35,6 @@ async def get_current_user(request: Request):
     return user
 
 
-# API 必須登入
-async def get_current_session_for_api(request: Request):
-    user = await _get_session_data(request)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not logged in",
-        )
-    return user
-
-
 async def check_user_id(user_id: str):
     user = await UserCrud.get(user_id)
     if not user:

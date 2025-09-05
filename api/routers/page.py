@@ -135,7 +135,22 @@ async def submit_exam(
 
     # Get user_answer list
     form = await request.form()
-    user_answers = [{"question_id": k, "user_answer": v} for k, v in dict(form).items()]
+    user_answers = [
+        {
+            "question_id": k,
+            "user_answer": "".join(sorted(list(item for item in v))),
+        }
+        for k, v in dict(form).items()
+    ]
+
+    # Check if user_answer is valid (Only Uppercase A, B, C, D)
+    for item in user_answers:
+        for c in item["user_answer"]:
+            if c not in ["A", "B", "C", "D"]:
+                return HTMLResponse(
+                    "答案格式錯誤，請確認每題答案皆為 A、B、C、D 其中一個",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
 
     # Create new exam record into database
     new_exam_record = ExamRecordSchema.ExamRecordCreate(
