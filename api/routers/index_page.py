@@ -92,6 +92,17 @@ async def index_page(
                 "exam_lists": exam_lists,
             },
         )
+    
+    # If logged in and user is teacher, show dashboard.html
+    elif current_user.role == Role.TEACHER:
+        return templates.TemplateResponse(
+            "dashboard.html",
+            {
+                "request": request,
+                "current_user": current_user,
+                "role": current_user.role,
+            },
+        )
 
 
 @router.post(

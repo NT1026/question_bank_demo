@@ -108,28 +108,7 @@ footer {
 }
 
 /* dashboard.html */
-.student-info {
-    max-width: 500px;
-    margin: 40px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    text-align: center;
-}
-.student-info h2 {
-    margin-bottom: 15px;
-    color: #333;
-    font-size: 1.5rem;
-}
-
-.student-info p {
-    margin-bottom: 20px;
-    font-size: 1.1rem;
-    color: #555;
-}
-
-.exam-selection {
+.selection {
     max-width: 500px;
     margin: 30px auto;
     padding: 20px;
@@ -139,19 +118,19 @@ footer {
     text-align: center;
 }
 
-.exam-selection h2 {
+.selection h2 {
     margin-bottom: 35px;
     color: #333;
     font-size: 1.5rem;
 }
 
-.exam-selection div {
+.selection div {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 
-.exam-selection a {
+.selection a {
     padding: 12px 24px;
     background: #0066cc;
     color: #fff;
@@ -161,7 +140,7 @@ footer {
     transition: background 0.3s ease;
 }
 
-.exam-selection a:hover {
+.selection a:hover {
     background: #004a99;
 }
 

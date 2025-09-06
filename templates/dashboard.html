@@ -1,102 +1,11 @@
-{% extends "base.html" %} {% block content %}
-<div class="student-info">
-    <h2>學生個人資訊</h2>
-    <p>學生名稱：{{ current_user.name }}</p>
-    <p>身分證字號：{{ current_user.username }}</p>
-</div>
-<div class="exam-selection">
-    <h2>開始測驗</h2>
-    <div>
-        <a href="/exam/math_achievement">數學成就測驗</a>
-        <a href="/exam/math_aptitude">數學性向測驗</a>
-        <a href="/exam/nature_science_achievement">自然成就測驗</a>
-        <a href="/exam/nature_science_aptitude">自然性向測驗</a>
-    </div>
-</div>
-<div class="exam-record-list">
-    <h2>數學成就測驗紀錄</h2>
-    <div class="exam-record-dashboard">
-        <p>門檻：65%</p>
-        <p>目標：85%</p>
-        <p>
-            總答題狀況：{{ exam_lists.math_achievement.all_correct }} / {{
-            exam_lists.math_achievement.all_questions }}
-        </p>
-        <p>總答對率：{{ exam_lists.math_achievement.all_accuracy }}</p>
-    </div>
+{% extends "base.html" %} 
+{% block content %}
 
-    {% for exam in exam_lists.math_achievement.exam_records %}
-    <div class="exam-record-info">
-        <p>測驗時間：{{ exam.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-        <p>答題狀況：{{ exam.score }} / {{ exam.question_count }}</p>
-        <p>答對率：{{ exam.accuracy }}</p>
-        <a href="/exam/record/{{ exam.exam_record_id }}">查看測驗紀錄</a>
-    </div>
-    {% endfor %}
-</div>
-<div class="exam-record-list">
-    <h2>數學性向測驗紀錄</h2>
-    <div class="exam-record-dashboard">
-        <p>門檻：75%</p>
-        <p>目標：80%</p>
-        <p>
-            總答題狀況：{{ exam_lists.math_aptitude.all_correct }} / {{
-            exam_lists.math_aptitude.all_questions }}
-        </p>
-        <p>總答對率：{{ exam_lists.math_aptitude.all_accuracy }}</p>
-    </div>
+{% if current_user.role =='student' %}
+    {% include 'dashboard_student.html' %}
 
-    {% for exam in exam_lists.math_aptitude.exam_records %}
-    <div class="exam-record-info">
-        <p>測驗時間：{{ exam.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-        <p>答題狀況：{{ exam.score }} / {{ exam.question_count }}</p>
-        <p>答對率：{{ exam.accuracy }}</p>
-        <a href="/exam/record/{{ exam.exam_record_id }}">查看測驗紀錄</a>
-    </div>
-    {% endfor %}
-</div>
-<div class="exam-record-list">
-    <h2>自然成就測驗紀錄</h2>
-    <div class="exam-record-dashboard">
-        <p>門檻：65%</p>
-        <p>目標：85%</p>
-        <p>
-            總答題狀況：{{ exam_lists.nature_science_achievement.all_correct }}
-            / {{ exam_lists.nature_science_achievement.all_questions }}
-        </p>
-        <p>
-            總答對率：{{ exam_lists.nature_science_achievement.all_accuracy }}
-        </p>
-    </div>
+{% elif current_user.role =='teacher' %}
+    {% include 'dashboard_teacher.html' %}
 
-    {% for exam in exam_lists.nature_science_achievement.exam_records %}
-    <div class="exam-record-info">
-        <p>測驗時間：{{ exam.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-        <p>答題狀況：{{ exam.score }} / {{ exam.question_count }}</p>
-        <p>答對率：{{ exam.accuracy }}</p>
-        <a href="/exam/record/{{ exam.exam_record_id }}">查看測驗紀錄</a>
-    </div>
-    {% endfor %}
-</div>
-<div class="exam-record-list">
-    <h2>自然性向測驗紀錄</h2>
-    <div class="exam-record-dashboard">
-        <p>門檻：75%</p>
-        <p>目標：80%</p>
-        <p>
-            總答題狀況：{{ exam_lists.nature_science_aptitude.all_correct }} /
-            {{ exam_lists.nature_science_aptitude.all_questions }}
-        </p>
-        <p>總答對率：{{ exam_lists.nature_science_aptitude.all_accuracy }}</p>
-    </div>
-
-    {% for exam in exam_lists.nature_science_aptitude.exam_records %}
-    <div class="exam-record-info">
-        <p>測驗時間：{{ exam.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-        <p>答題狀況：{{ exam.score }} / {{ exam.question_count }}</p>
-        <p>答對率：{{ exam.accuracy }}</p>
-        <a href="/exam/record/{{ exam.exam_record_id }}">查看測驗紀錄</a>
-    </div>
-    {% endfor %}
-</div>
+{% endif %}
 {% endblock %}
