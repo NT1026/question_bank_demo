@@ -128,7 +128,7 @@ async def submit_exam(
     )
 
     return RedirectResponse(
-        f"/exam/record/{exam_record.id}",
+        f"/student/exam/record/{exam_record.id}",
         status_code=status.HTTP_302_FOUND,
     )
 

@@ -1,17 +1,19 @@
+{% extends "base.html" %} {% block content %}
 <div class="selection">
     <h2>使用者相關功能</h2>
     <div>
-        <a href="/user/create">新增使用者</a>
-        <a href="/user/read">查詢指定學生紀錄</a>
-        <a href="/user/delete">刪除使用者</a>
+        <a href="/teacher/user/create">新增使用者</a>
+        <a href="/teacher/user/read">查詢指定學生紀錄</a>
+        <a href="/teacher/user/delete">刪除使用者</a>
     </div>
 </div>
 
 <div class="selection">
     <h2>題庫相關功能</h2>
     <div>
-        <a href="/question/create">新增題目</a>
-        <a href="/question/read">列出題目清單</a>
-        <a href="/question/delete">刪除題目</a>
+        <a href="/teacher/question/create">新增題目</a>
+        <a href="/teacher/question/read">列出題目清單</a>
+        <a href="/teacher/question/delete">刪除題目</a>
     </div>
 </div>
+{% endblock %}

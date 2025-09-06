@@ -10,6 +10,8 @@ from .routers import (
     index_page_router,
     question_router,
     student_page_router,
+    teacher_question_page_router,
+    teacher_user_page_router,
     user_router,
 )
 
@@ -21,7 +23,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Routers
 app.include_router(index_page_router, tags=["Index Page"])
-app.include_router(student_page_router, tags=["Student Page"])
+app.include_router(student_page_router, prefix="/student", tags=["Student Page"])
+app.include_router(teacher_user_page_router, prefix="/teacher", tags=["Teacher Page"])
+app.include_router(teacher_question_page_router, prefix="/teacher", tags=["Teacher Page"])
 app.include_router(user_router, prefix="/user", tags=["User"])
 app.include_router(question_router, prefix="/question", tags=["Question"])
 

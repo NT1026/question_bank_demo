@@ -2,7 +2,7 @@
 <div class="exam-container">
     <h1>{{ subject.chinese_name }} 練習試卷</h1>
     <div id="timer">測驗開始！</div>
-    <form id="examForm" method="post" action="/exam/submit/{{ subject.name }}">
+    <form id="examForm" method="post" action="/student/exam/submit/{{ subject.name }}">
         {% for q in questions %}
         <div class="question">
             <p>題目 {{ loop.index }}：</p>

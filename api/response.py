@@ -7,6 +7,16 @@ _302_REDIRECT_TO_HOME = RedirectResponse(
     status_code=status.HTTP_302_FOUND,
 )
 
+_302_REDIRECT_TO_STUDENT_DASHBOARD = RedirectResponse(
+    "/student/dashboard",
+    status_code=status.HTTP_302_FOUND,
+)
+
+_302_REDIRECT_TO_TEACHER_DASHBOARD = RedirectResponse(
+    "/teacher/dashboard",
+    status_code=status.HTTP_302_FOUND,
+)
+
 _401_LOGIN_FAILED = HTMLResponse(
     "登入失敗",
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -14,6 +24,11 @@ _401_LOGIN_FAILED = HTMLResponse(
 
 _403_NOT_A_STUDENT = HTMLResponse(
     "您的角色非學生，無法使用該功能",
+    status_code=status.HTTP_403_FORBIDDEN,
+)
+
+_403_NOT_A_TEACHER = HTMLResponse(
+    "您的角色非教師，無法使用該功能",
     status_code=status.HTTP_403_FORBIDDEN,
 )
 

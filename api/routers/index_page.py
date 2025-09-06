@@ -6,7 +6,11 @@ from fastapi.templating import Jinja2Templates
 from .depends import get_current_user
 from api.response import (
     _302_REDIRECT_TO_HOME,
+    _302_REDIRECT_TO_STUDENT_DASHBOARD,
+    _302_REDIRECT_TO_TEACHER_DASHBOARD,
     _401_LOGIN_FAILED,
+    _403_NOT_A_STUDENT,
+    _403_NOT_A_TEACHER,
 )
 from auth.passwd import verify_password
 from crud.exam_record import ExamRecordCrudManager
@@ -73,36 +77,83 @@ async def index_page(
 
     # If logged in and user is student, show dashboard.html
     if current_user.role == Role.STUDENT:
-        # Get all exam info of current user
-        exam_records = await ExamRecordCrud.get_by_user_id(current_user.id)
-        exam_lists = {
-            subject_type: await get_exam_summary(
-                [item.id for item in exam_records if item.subject_type == subject_type]
-            )
-            for subject_type in SUBJECT_EXAM_INFO
-        }
+        return _302_REDIRECT_TO_STUDENT_DASHBOARD
 
-        # If logged in, show dashboard.html
-        return templates.TemplateResponse(
-            "dashboard.html",
-            {
-                "request": request,
-                "current_user": current_user,
-                "role": current_user.role,
-                "exam_lists": exam_lists,
-            },
-        )
-    
     # If logged in and user is teacher, show dashboard.html
     elif current_user.role == Role.TEACHER:
-        return templates.TemplateResponse(
-            "dashboard.html",
-            {
-                "request": request,
-                "current_user": current_user,
-                "role": current_user.role,
-            },
+        return _302_REDIRECT_TO_TEACHER_DASHBOARD
+
+
+@router.get(
+    "/student/dashboard",
+    response_class=HTMLResponse,
+)
+async def student_dashboard(
+    request: Request,
+    current_user=Depends(get_current_user),
+):
+    """
+    學生儀表板頁面
+    - 未登入使用者無法進入學生儀表板，會被導向首頁
+    - 已登入使用者，且使用者角色為非學生，無法進入學生儀表板，會回應 403 錯誤
+    - 已登入使用者，且使用者角色為學生，可進入學生儀表板
+    """
+    # Check if user is logged in
+    if not current_user:
+        return _302_REDIRECT_TO_HOME
+
+    # If logged in, check if user is student
+    if current_user.role != Role.STUDENT:
+        return _403_NOT_A_STUDENT
+
+    # Get all exam info of current user
+    exam_records = await ExamRecordCrud.get_by_user_id(current_user.id)
+    exam_lists = {
+        subject_type: await get_exam_summary(
+            [item.id for item in exam_records if item.subject_type == subject_type]
         )
+        for subject_type in SUBJECT_EXAM_INFO
+    }
+
+    return templates.TemplateResponse(
+        "dashboard_student.html",
+        {
+            "request": request,
+            "current_user": current_user,
+            "exam_lists": exam_lists,
+        },
+    )
+
+
+@router.get(
+    "/teacher/dashboard",
+    response_class=HTMLResponse,
+)
+async def teacher_dashboard(
+    request: Request,
+    current_user=Depends(get_current_user),
+):
+    """
+    教師儀表板頁面
+    - 未登入使用者無法進入教師儀表板，會被導向首頁
+    - 已登入使用者，且使用者角色為非教師，無法進入教師儀表板，會回應 403 錯誤
+    - 已登入使用者，且使用者角色為教師，可進入教師儀表板
+    """
+    # Check if user is logged in
+    if not current_user:
+        return _302_REDIRECT_TO_HOME
+
+    # If logged in, check if user is teacher
+    if current_user.role != Role.TEACHER:
+        return _403_NOT_A_TEACHER
+
+    return templates.TemplateResponse(
+        "dashboard_teacher.html",
+        {
+            "request": request,
+            "current_user": current_user,
+        },
+    )
 
 
 @router.post(
