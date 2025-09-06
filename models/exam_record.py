@@ -13,7 +13,7 @@ class ExamRecord(Base):
     user_id: Mapped[BaseType.uuid] = mapped_column(
         ForeignKey("User.id", ondelete="CASCADE")
     )
-    subject: Mapped[BaseType.str_20]
+    subject_type: Mapped[BaseType.str_30]
     score: Mapped[BaseType.int_type]
     user_answers: Mapped[BaseType.json_type]
     created_at: Mapped[BaseType.datetime]
@@ -28,13 +28,13 @@ class ExamRecord(Base):
     def __init__(
         self,
         user_id: str,
-        subject: str,
+        subject_type: str,
         score: int,
         user_answers: list[UserAnswer],
     ):
         self.id = str(uuid4())
         self.user_id = user_id
-        self.subject = subject
+        self.subject_type = subject_type
         self.score = score
         self.user_answers = (
             [item.model_dump() for item in user_answers] if user_answers else []
@@ -42,4 +42,4 @@ class ExamRecord(Base):
         self.created_at = datetime.now()
 
     def __repr__(self):
-        return f"ExamRecord(id={self.id}, user_id={self.user_id}, subject={self.subject}, score={self.score}, user_answers={self.user_answers}, created_at={self.created_at})"
+        return f"ExamRecord(id={self.id}, user_id={self.user_id}, subject_type={self.subject_typew}, score={self.score}, user_answers={self.user_answers}, created_at={self.created_at})"

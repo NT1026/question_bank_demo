@@ -10,32 +10,6 @@ ExamRecordCrud = ExamRecordCrudManager()
 UserCrud = UserCrudManager()
 
 
-@router.get(
-    "/particular/{exam_record_id}",
-    response_model=ExamRecordSchema.ExamRecordRead,
-    status_code=status.HTTP_200_OK,
-)
-async def read_exam_record(exam_record_id: str = Depends(check_exam_record_id)):
-    """
-    根據 exam_record_id 取得測驗紀錄
-    """
-    exam_record = await ExamRecordCrud.get(exam_record_id)
-    return exam_record
-
-
-@router.get(
-    "/particular_user/{user_id}",
-    response_model=list[ExamRecordSchema.ExamRecordRead],
-    status_code=status.HTTP_200_OK,
-)
-async def read_exam_records_by_user_id(user_id: str = Depends(check_user_id)):
-    """
-    根據 user_id 取得該使用者的所有測驗紀錄
-    """
-    exam_records = await ExamRecordCrud.get_by_user_id(user_id)
-    return exam_records
-
-
 @router.delete(
     "/{exam_record_id}",
     status_code=status.HTTP_204_NO_CONTENT,

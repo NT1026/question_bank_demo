@@ -16,6 +16,7 @@ class BaseType:
     str_4 = Annotated[str, mapped_column(String(4))]
     str_10 = Annotated[str, mapped_column(String(10))]
     str_20 = Annotated[str, mapped_column(String(20))]
+    str_30 = Annotated[str, mapped_column(String(30))]
     str_1000 = Annotated[str, mapped_column(String(1000))]
     datetime = Annotated[datetime, mapped_column(DateTime)]
     json_type = Annotated[dict, mapped_column(JSON)]

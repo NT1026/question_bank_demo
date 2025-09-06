@@ -8,7 +8,7 @@ class UserAnswer(BaseModel):
 
 
 class ExamRecordBase(BaseModel):
-    subject: str = Field(min_length=1, max_length=20)
+    subject_type: str = Field(min_length=1, max_length=30)
     user_answers: list[UserAnswer]
 
 
@@ -17,7 +17,7 @@ class ExamRecordCreate(ExamRecordBase):
         "json_schema_extra": {
             "examples": [
                 {
-                    "subject": "math",
+                    "subject_type": "math_achievement",
                     "user_answers": [
                         {
                             "question_id": "question-uuid-1",

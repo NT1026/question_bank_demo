@@ -22,6 +22,11 @@ header h1 {
     font-size: 1.5rem;
 }
 
+header a {
+    color: white;
+    text-decoration: none;
+}
+
 header nav a {
     color: #fff;
     margin-left: 15px;
@@ -142,7 +147,7 @@ footer {
 
 .exam-selection div {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 兩欄 */
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 
@@ -157,6 +162,69 @@ footer {
 }
 
 .exam-selection a:hover {
+    background: #004a99;
+}
+
+.exam-record-list {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+}
+
+.exam-record-list h2 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.exam-record-dashboard {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 20px;
+    margin: 20px 0;
+}
+
+.exam-record-dashboard p {
+    margin: 10px 0;
+    padding: 12px 24px;
+    background: rgba(0, 221, 255, 0.632);
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+    font-weight: bold;
+}
+
+.exam-record-info {
+    width: 100%;
+    padding: 15px 0px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: #f5f5f5;
+}
+.exam-record-info p {
+    margin: 8px 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.exam-record-info a {
+    padding: 5px 15px;
+    margin: 10px 0;
+    background: #0066cc;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+}
+
+.exam-record-info a:hover {
     background: #004a99;
 }
 
@@ -199,6 +267,13 @@ footer {
 
 .exam-container button:hover {
     background: #004a99;
+}
+
+.exam-result {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
 }
 
 .question {
