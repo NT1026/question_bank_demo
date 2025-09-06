@@ -1,20 +1,19 @@
-from fastapi import (
-    APIRouter,
-    Depends,
-    File,
-    Form,
-    HTTPException,
-    Query,
-    status,
-    UploadFile,
-)
+from fastapi import APIRouter, Depends, File, Form, Query, status, UploadFile
 from fastapi.responses import FileResponse
 from itsdangerous import BadSignature, SignatureExpired
 from pathlib import Path
 from shutil import copyfileobj
 from uuid import uuid4
 
-from .depends import check_question_id, get_current_user
+from .depends import get_current_user
+from api.response import (
+    _400_INVALID_ANSWER_FORMAT_API,
+    _400_INVALID_FILE_TYPE_API,
+    _403_INVALID_IMAGE_TOKEN_API,
+    _403_IMAGE_TOKEN_EXPIRED_API,
+    _404_QUESTION_NOT_FOUND_API,
+    _500_CREATE_QUESTION_FAILED_API,
+)
 from auth.image import serializer
 from crud.question import QuestionCrudManager
 from schemas import question as QuestionSchema
@@ -42,18 +41,16 @@ async def create_question(
     """
     # Check answer format is valid
     sorted_answer = "".join(sorted(list(item for item in answer.upper())))
-    if not sorted_answer or not all(c in "ABCD" for c in sorted_answer) or len(sorted_answer) > 4:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Answer must be combination of A/B/C/D, 1~4 characters",
-        )
+    if (
+        not sorted_answer
+        or not all(c in "ABCD" for c in sorted_answer)
+        or len(sorted_answer) > 4
+    ):
+        raise _400_INVALID_ANSWER_FORMAT_API
 
     # File type check
     if file.content_type not in ["image/jpeg"]:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="File must be a JPG image",
-        )
+        raise _400_INVALID_FILE_TYPE_API
 
     # Write file to disk
     try:
@@ -84,36 +81,8 @@ async def create_question(
 
         return question
 
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to save file: {e}",
-        )
-
-
-@router.get(
-    "/subject/{subject}",
-    response_model=list[QuestionSchema.QuestionRead],
-    status_code=status.HTTP_200_OK,
-)
-async def read_questions_by_subject(subject: str):
-    """
-    根據科目取得該科目所有題目
-    """
-    questions = await QuestionCrud.get_by_subject(subject)
-    return questions
-
-
-@router.delete(
-    "/{question_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-async def delete_question(question_id: str = Depends(check_question_id)):
-    """
-    根據 question_id 刪除題目
-    """
-    await QuestionCrud.delete(question_id)
-    return
+    except Exception:
+        raise _500_CREATE_QUESTION_FAILED_API
 
 
 @router.get(
@@ -126,32 +95,19 @@ async def get_question_image(
     current_user=Depends(get_current_user),
 ):
     try:
-        # Only valid for 5 minutes
         data = serializer.loads(token, max_age=10)
     except SignatureExpired:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Token expired",
-        )
+        raise _403_IMAGE_TOKEN_EXPIRED_API
     except BadSignature:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid token",
-        )
+        raise _403_INVALID_IMAGE_TOKEN_API
 
     # Check if token belongs to the current user
     if data["user_id"] != str(current_user.id):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Permission denied",
-        )
+        raise _403_INVALID_IMAGE_TOKEN_API
 
     # Check if filename matches
     question = await QuestionCrud.get(question_id)
     if not question:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Question image not found",
-        )
+        raise _404_QUESTION_NOT_FOUND_API
 
     return FileResponse(question.image_path, media_type="image/jpeg")

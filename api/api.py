@@ -7,11 +7,9 @@ from uvicorn import Config, Server
 
 from settings.configs import Settings
 from .routers import (
-    auth_router,
-    exam_record_router,
-    info_router,
-    page_router,
+    index_page_router,
     question_router,
+    student_page_router,
     user_router,
 )
 
@@ -22,12 +20,10 @@ settings = Settings()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Routers
-app.include_router(info_router, prefix="/info", tags=["Info"])
-app.include_router(page_router, tags=["Page"])
-app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+app.include_router(index_page_router, tags=["Index Page"])
+app.include_router(student_page_router, tags=["Student Page"])
 app.include_router(user_router, prefix="/user", tags=["User"])
 app.include_router(question_router, prefix="/question", tags=["Question"])
-app.include_router(exam_record_router, prefix="/exam", tags=["Exam"])
 
 # CORS settings
 origins = ["http://127.0.0.1"]  # domain name

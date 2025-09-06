@@ -1,0 +1,138 @@
+from datetime import datetime, timedelta
+from fastapi import APIRouter, Depends, Form, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+
+from .depends import get_current_user
+from api.response import (
+    _302_REDIRECT_TO_HOME,
+    _401_LOGIN_FAILED,
+)
+from auth.passwd import verify_password
+from crud.exam_record import ExamRecordCrudManager
+from crud.question import QuestionCrudManager
+from crud.user import UserCrudManager
+from models.base import Role
+from settings.subject import SUBJECT_EXAM_INFO
+
+router = APIRouter()
+templates = Jinja2Templates(directory="templates")
+
+ExamRecordCrud = ExamRecordCrudManager()
+QuestionCrud = QuestionCrudManager()
+UserCrud = UserCrudManager()
+
+
+async def get_exam_summary(ids):
+    records = []
+    all_correct = 0
+    all_questions = 0
+
+    for exam_id in ids:
+        exam = await ExamRecordCrud.get(exam_id)
+        records.append(
+            {
+                "exam_record_id": exam_id,
+                "score": exam.score,
+                "question_count": len(exam.user_answers),
+                "accuracy": f"{(exam.score / len(exam.user_answers)) * 100:.2f}%",
+                "created_at": exam.created_at,
+            }
+        )
+        all_correct += exam.score
+        all_questions += len(exam.user_answers)
+
+    records.sort(key=lambda x: x["created_at"], reverse=True)
+    all_accuracy = (
+        f"{(all_correct / all_questions) * 100:.2f}%" if all_questions else "0.00%"
+    )
+
+    return {
+        "all_correct": all_correct,
+        "all_questions": all_questions,
+        "all_accuracy": all_accuracy,
+        "exam_records": records,
+    }
+
+
+@router.get(
+    "/",
+    response_class=HTMLResponse,
+)
+async def index_page(
+    request: Request,
+    current_user=Depends(get_current_user),
+):
+    """
+    首頁 API
+    - 未登入使用者可瀏覽首頁，但無法進入考試頁面
+    - 已登入使用者可瀏覽首頁，並可進入考試頁面
+    """
+    # If not logged in, show index.html
+    if not current_user:
+        return templates.TemplateResponse("index.html", {"request": request})
+
+    # If logged in and user is student, show dashboard.html
+    if current_user.role == Role.STUDENT:
+        # Get all exam info of current user
+        exam_records = await ExamRecordCrud.get_by_user_id(current_user.id)
+        exam_lists = {
+            subject_type: await get_exam_summary(
+                [item.id for item in exam_records if item.subject_type == subject_type]
+            )
+            for subject_type in SUBJECT_EXAM_INFO
+        }
+
+        # If logged in, show dashboard.html
+        return templates.TemplateResponse(
+            "dashboard.html",
+            {
+                "request": request,
+                "current_user": current_user,
+                "role": current_user.role,
+                "exam_lists": exam_lists,
+            },
+        )
+
+
+@router.post(
+    "/login",
+    response_class=HTMLResponse,
+)
+async def login(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+):
+    """
+    登入 API
+    - 輸入：
+        - username：使用者名稱 / 身份證
+        - password：密碼
+    - 檢查使用者是否存在 (用 username / 身份證檢查) 且密碼正確
+    """
+    # Check if user exists and password is correct
+    user = await UserCrud.get_by_username(username)
+    if not user or not verify_password(password, user.password):
+        return _401_LOGIN_FAILED
+
+    # Create session
+    new_session = {
+        "user_id": user.id,
+        "token_expiry": (datetime.now() + timedelta(hours=1)).timestamp(),
+    }
+    request.session.update(new_session)
+    return _302_REDIRECT_TO_HOME
+
+
+@router.get(
+    "/logout",
+    response_class=HTMLResponse,
+)
+async def logout(request: Request):
+    """
+    登出 API
+    - 清除 session
+    """
+    request.session.clear()
+    return _302_REDIRECT_TO_HOME

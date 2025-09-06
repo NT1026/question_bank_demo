@@ -1,8 +1,14 @@
 from datetime import datetime
+from enum import Enum
 from sqlalchemy import DateTime, Integer, String
 from sqlalchemy.dialects.mysql import JSON
 from sqlalchemy.orm import DeclarativeBase, mapped_column
 from typing import Annotated
+
+
+class Role(str, Enum):
+    STUDENT = "student"
+    TEACHER = "teacher"
 
 
 class Base(DeclarativeBase):
