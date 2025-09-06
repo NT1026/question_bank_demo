@@ -1,3 +1,16 @@
 {% extends "base.html" %} {% block content %}
-<p>user_delete page</p>
+<div class="user-function">
+    <h2>刪除使用者</h2>
+    <p>輸入指定帳號，刪除指定使用者 (含過去考試紀錄)</p>
+    <form action="/teacher/user/delete" method="post">
+        <label for="username">帳號 (身分證字號)</label>
+        <input type="text" id="username" name="username" required />
+        <button type="submit">刪除</button>
+    </form>
+    {% if error %}
+    <p style="color: red">{{ error }}</p>
+    {% endif %} {% if success %}
+    <p style="color: green">{{ success }}</p>
+    {% endif %}
+</div>
 {% endblock %}

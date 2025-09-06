@@ -1,17 +1,8 @@
 from datetime import datetime
 from fastapi import Request
 
-from api.response import (
-    _404_EXAM_RECORD_NOT_FOUND_API,
-    _404_QUESTION_NOT_FOUND_API,
-    _404_USER_NOT_FOUND_API,
-)
-from crud.question import QuestionCrudManager
-from crud.exam_record import ExamRecordCrudManager
 from crud.user import UserCrudManager
 
-QuestionCrud = QuestionCrudManager()
-ExamRecordCrud = ExamRecordCrudManager()
 UserCrud = UserCrudManager()
 
 
@@ -38,27 +29,3 @@ async def _get_session_data(request: Request):
 async def get_current_user(request: Request):
     user = await _get_session_data(request)
     return user
-
-
-async def check_user_id(user_id: str):
-    user = await UserCrud.get(user_id)
-    if not user:
-        raise _404_USER_NOT_FOUND_API
-
-    return user_id
-
-
-async def check_question_id(question_id: str):
-    question = await QuestionCrud.get(question_id)
-    if not question:
-        raise _404_QUESTION_NOT_FOUND_API
-
-    return question_id
-
-
-async def check_exam_record_id(exam_record_id: str):
-    exam_record = await ExamRecordCrud.get(exam_record_id)
-    if not exam_record:
-        raise _404_EXAM_RECORD_NOT_FOUND_API
-
-    return exam_record

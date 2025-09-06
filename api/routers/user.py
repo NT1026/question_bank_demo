@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 
-from .depends import check_user_id
 from api.response import (
     _409_USER_EXISTS_API,
 )
@@ -47,15 +46,3 @@ async def read_all_users():
     """
     users = await UserCrud.get_all()
     return users
-
-
-@router.delete(
-    "/{user_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-async def delete_user(user_id: str = Depends(check_user_id)):
-    """
-    根據 user_id 刪除使用者
-    """
-    await UserCrud.delete(user_id)
-    return

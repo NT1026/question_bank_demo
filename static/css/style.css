@@ -86,10 +86,12 @@ footer {
 .form-group input[type="text"],
 .form-group input[type="password"] {
     width: 100%;
+    font-size: 1rem;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 3px;
     box-sizing: border-box;
+    text-align: center;
 }
 
 .form-group button {
@@ -107,7 +109,7 @@ footer {
     background-color: #0056b3;
 }
 
-/* dashboard.html */
+/* dashboard_student.html and dashboard_teacher.html*/
 .selection {
     max-width: 500px;
     margin: 30px auto;
@@ -341,4 +343,65 @@ footer {
 
 .result-actions a:hover {
     background: #004a99;
+}
+
+/* user_create.html and user_read.html and user_delete.html */
+.user-function {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 40px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+}
+
+.user-function form {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.user-function form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.user-function form input[type="text"] {
+    width: 100%;
+    padding: 10px 0px;
+    margin-bottom: 15px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border 0.3s ease;
+    text-align: center;
+}
+
+.user-function form input[type="text"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.user-function form button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.user-function form button:hover {
+    background-color: #004a99;
 }

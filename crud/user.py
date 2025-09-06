@@ -56,12 +56,12 @@ class UserCrudManager:
 
         return user
 
-    async def delete(
+    async def delete_by_username(
         self,
-        user_id: str,
+        username: str,
         db_session: AsyncSession,
     ):
-        stmt = delete(UserModel).where(UserModel.id == user_id)
+        stmt = delete(UserModel).where(UserModel.username == username)
         await db_session.execute(stmt)
         await db_session.commit()
 
