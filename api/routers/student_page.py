@@ -39,11 +39,10 @@ async def exam_page(
     - 已登入使用者，且使用者角色為非學生，無法進入考試頁面，會回應 403 錯誤
     - 已登入使用者，且使用者角色為學生，可進入考試頁面
     """
-    # Check if user is logged in
+    # Check if user is student
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    # If logged in, check if user is student
     if current_user.role != Role.STUDENT:
         return _403_NOT_A_STUDENT
 
@@ -62,7 +61,7 @@ async def exam_page(
     for question in selected_quesions:
         question.token = generate_image_token(str(current_user.id), question.id)
 
-    # Show exam.html
+    # Render exam.html
     return templates.TemplateResponse(
         "exam.html",
         {
@@ -89,11 +88,10 @@ async def submit_exam(
     - 已登入使用者，且使用者角色為非學生，無法提交考卷，會回應 403 錯誤
     - 已登入使用者，且使用者角色為學生，可提交考卷
     """
-    # Check if user is logged in
+    # Check if user is student
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    # If logged in, check if user is student
     if current_user.role != Role.STUDENT:
         return _403_NOT_A_STUDENT
 
@@ -127,6 +125,7 @@ async def submit_exam(
         newExamRecord=new_exam_record,
     )
 
+    # Redirect to exam record page
     return RedirectResponse(
         f"/student/exam/record/{exam_record.id}",
         status_code=status.HTTP_302_FOUND,
@@ -148,11 +147,10 @@ async def get_exam_record(
     - 已登入使用者，且使用者角色為非學生，無法進入測驗結果頁面，會回應 403 錯誤
     - 已登入使用者，且使用者角色為學生，可進入測驗結果頁面
     """
-    # Check if user is logged in
+    # Check if user is student
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    # If logged in, check if user is student
     if current_user.role != Role.STUDENT:
         return _403_NOT_A_STUDENT
 

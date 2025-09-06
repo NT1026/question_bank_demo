@@ -71,15 +71,14 @@ async def index_page(
     - 已登入使用者，且角色為學生，可瀏覽首頁
     - 已登入使用者，且角色為老師，可瀏覽首頁
     """
-    # If not logged in, show index.html
+    # If not logged in
     if not current_user:
         return templates.TemplateResponse("index.html", {"request": request})
 
-    # If logged in and user is student, show dashboard.html
+    # If logged in
     if current_user.role == Role.STUDENT:
         return _302_REDIRECT_TO_STUDENT_DASHBOARD
 
-    # If logged in and user is teacher, show dashboard.html
     elif current_user.role == Role.TEACHER:
         return _302_REDIRECT_TO_TEACHER_DASHBOARD
 
@@ -98,11 +97,10 @@ async def student_dashboard(
     - 已登入使用者，且使用者角色為非學生，無法進入學生儀表板，會回應 403 錯誤
     - 已登入使用者，且使用者角色為學生，可進入學生儀表板
     """
-    # Check if user is logged in
+    # Check if user is student
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    # If logged in, check if user is student
     if current_user.role != Role.STUDENT:
         return _403_NOT_A_STUDENT
 
@@ -115,6 +113,7 @@ async def student_dashboard(
         for subject_type in SUBJECT_EXAM_INFO
     }
 
+    # Render dashboard_student.html
     return templates.TemplateResponse(
         "dashboard_student.html",
         {
@@ -139,14 +138,14 @@ async def teacher_dashboard(
     - 已登入使用者，且使用者角色為非教師，無法進入教師儀表板，會回應 403 錯誤
     - 已登入使用者，且使用者角色為教師，可進入教師儀表板
     """
-    # Check if user is logged in
+    # Check if user is teacher
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    # If logged in, check if user is teacher
     if current_user.role != Role.TEACHER:
         return _403_NOT_A_TEACHER
 
+    # Render dashboard_teacher.html
     return templates.TemplateResponse(
         "dashboard_teacher.html",
         {

@@ -30,14 +30,14 @@ async def user_create(
     - 已登入使用者，且使用者角色為非老師，無法進入新增使用者頁面，會回應 403 錯誤
     - 已登入使用者，且使用者角色為老師，可進入新增使用者頁面
     """
-    # Check if user is logged in
+    # Check if user is teacher
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    # If logged in, check if user is teacher
     if current_user.role != Role.TEACHER:
         return _403_NOT_A_TEACHER
 
+    # Render user_create.html
     return templates.TemplateResponse(
         "user_create.html",
         {
@@ -61,14 +61,14 @@ async def user_read(
     - 已登入使用者，且使用者角色為非老師，無法進入使用者列表頁面，會回應 403 錯誤
     - 已登入使用者，且使用者角色為老師，可進入使用者列表頁面
     """
-    # Check if user is logged in
+    # Check if user is teacher
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    # If logged in, check if user is teacher
     if current_user.role != Role.TEACHER:
         return _403_NOT_A_TEACHER
 
+    # Render user_read.html
     return templates.TemplateResponse(
         "user_read.html",
         {
@@ -92,14 +92,14 @@ async def user_delete(
     - 已登入使用者，且使用者角色為非老師，無法進入刪除使用者頁面，會回應 403 錯誤
     - 已登入使用者，且使用者角色為老師，可進入刪除使用者頁面
     """
-    # Check if user is logged in
+    # Check if user is teacher
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    # If logged in, check if user is teacher
     if current_user.role != Role.TEACHER:
         return _403_NOT_A_TEACHER
 
+    # Render user_delete.html
     return templates.TemplateResponse(
         "user_delete.html",
         {
