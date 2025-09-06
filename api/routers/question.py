@@ -11,7 +11,7 @@ from api.response import (
     _400_INVALID_FILE_TYPE_API,
     _403_INVALID_IMAGE_TOKEN_API,
     _403_IMAGE_TOKEN_EXPIRED_API,
-    _404_QUESTION_NOT_FOUND_API,
+    _404_IMAGE_FILE_NOT_FOUND_API,
     _500_CREATE_QUESTION_FAILED_API,
 )
 from auth.image import serializer
@@ -105,9 +105,9 @@ async def get_question_image(
     if data["user_id"] != str(current_user.id):
         raise _403_INVALID_IMAGE_TOKEN_API
 
-    # Check if filename matches
+    # Check if file (image_path) exists
     question = await QuestionCrud.get(question_id)
-    if not question:
-        raise _404_QUESTION_NOT_FOUND_API
-
+    if not question or not Path(question.image_path).exists():
+        raise _404_IMAGE_FILE_NOT_FOUND_API
+    
     return FileResponse(question.image_path, media_type="image/jpeg")

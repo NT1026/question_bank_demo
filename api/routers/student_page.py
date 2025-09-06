@@ -95,7 +95,7 @@ async def submit_exam(
 
     # If logged in, check if user is student
     if current_user.role != Role.STUDENT:
-        return _404_EXAM_RECORD_NOT_FOUND
+        return _403_NOT_A_STUDENT
 
     # If logged in, check subject is valid
     if subject_type not in SUBJECT_EXAM_INFO:

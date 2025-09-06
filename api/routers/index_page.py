@@ -10,7 +10,6 @@ from api.response import (
 )
 from auth.passwd import verify_password
 from crud.exam_record import ExamRecordCrudManager
-from crud.question import QuestionCrudManager
 from crud.user import UserCrudManager
 from models.base import Role
 from settings.subject import SUBJECT_EXAM_INFO
@@ -19,7 +18,6 @@ router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
 ExamRecordCrud = ExamRecordCrudManager()
-QuestionCrud = QuestionCrudManager()
 UserCrud = UserCrudManager()
 
 
@@ -66,7 +64,8 @@ async def index_page(
     """
     首頁 API
     - 未登入使用者可瀏覽首頁，但無法進入考試頁面
-    - 已登入使用者可瀏覽首頁，並可進入考試頁面
+    - 已登入使用者，且角色為學生，可瀏覽首頁
+    - 已登入使用者，且角色為老師，可瀏覽首頁
     """
     # If not logged in, show index.html
     if not current_user:

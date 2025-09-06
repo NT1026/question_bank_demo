@@ -59,6 +59,11 @@ _403_IMAGE_TOKEN_EXPIRED_API = HTTPException(
     detail="Token expired",
 )
 
+_404_IMAGE_FILE_NOT_FOUND_API = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail="IMAGE file does not exist",
+)
+
 _404_QUESTION_NOT_FOUND_API = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
     detail="Question does not exist",
