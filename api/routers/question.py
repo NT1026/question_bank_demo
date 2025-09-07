@@ -29,6 +29,7 @@ settings = Settings()
     "",
     response_model=QuestionSchema.QuestionRead,
     status_code=status.HTTP_201_CREATED,
+    deprecated=True,
 )
 async def create_question(
     file: UploadFile = File(...),
@@ -109,5 +110,5 @@ async def get_question_image(
     question = await QuestionCrud.get(question_id)
     if not question or not Path(question.image_path).exists():
         raise _404_IMAGE_FILE_NOT_FOUND_API
-    
+
     return FileResponse(question.image_path, media_type="image/jpeg")

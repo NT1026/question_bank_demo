@@ -1,4 +1,30 @@
-{% extends "base.html" %} 
-{% block content %}
-<p>question_create page</p>
+{% extends "base.html" %} {% block content %}
+<div class="question-function">
+    <h2>新增題目功能</h2>
+    <p>輸入以下資訊，新增題目</p>
+    <form
+        action="/teacher/question/create"
+        method="post"
+        enctype="multipart/form-data"
+    >
+        <label for="file"
+            >選擇要上傳的檔案<br />(檔名格式：M-xxx.jpg / N-xxx.jpg)</label
+        >
+        <input type="file" name="file" id="file" required />
+        <label for="answer">請輸入本題的答案</label>
+        <input
+            type="text"
+            name="answer"
+            pattern="[ABCD]{1,4}"
+            title="答案只能是大寫 A、B、C、D 的組合"
+            required
+        />
+        <button type="submit">建立</button>
+    </form>
+    {% if error %}
+    <p style="color: red">{{ error }}</p>
+    {% endif %} {% if success %}
+    <p style="color: green">{{ success }}</p>
+    {% endif %}
+</div>
 {% endblock %}

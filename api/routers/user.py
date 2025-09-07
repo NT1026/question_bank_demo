@@ -34,16 +34,3 @@ async def create_user(newUser: UserSchema.UserCreate):
     newUser.password = get_password_hash(newUser.password)
     user = await UserCrud.create(newUser)
     return user
-
-
-@router.get(
-    "",
-    response_model=list[UserSchema.UserRead],
-    status_code=status.HTTP_200_OK,
-)
-async def read_all_users():
-    """
-    取得所有使用者資訊
-    """
-    users = await UserCrud.get_all()
-    return users
