@@ -27,7 +27,7 @@ app.include_router(student_page_router, prefix="/student", tags=["Student Page"]
 app.include_router(teacher_user_page_router, prefix="/teacher", tags=["Teacher Page"])
 app.include_router(teacher_question_page_router, prefix="/teacher", tags=["Teacher Page"])
 app.include_router(user_router, prefix="/api/user", tags=["User"])
-app.include_router(question_router, prefix="/question", tags=["Question"])
+app.include_router(question_router, prefix="/api/question", tags=["Question"])
 
 # CORS settings
 origins = ["http://127.0.0.1"]  # domain name

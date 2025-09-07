@@ -405,3 +405,65 @@ footer {
 .user-function form button:hover {
     background-color: #004a99;
 }
+
+
+/* question_create.html and question_read.html and question_delete.html */
+.question-function {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 40px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+}
+
+.question-function form {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.question-function form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.question-function form input[type="text"] {
+    width: 100%;
+    padding: 10px 0px;
+    margin-bottom: 15px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border 0.3s ease;
+    text-align: center;
+}
+
+.question-function form input[type="text"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.question-function form button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.question-function form button:hover {
+    background-color: #004a99;
+}

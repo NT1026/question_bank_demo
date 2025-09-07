@@ -47,13 +47,24 @@ class QuestionCrudManager:
         questions = result.scalars().all()
 
         return questions
-
-    async def delete(
+    
+    async def get_by_filename(
         self,
-        question_id: str,
+        filename: str,
         db_session: AsyncSession,
     ):
-        stmt = delete(QuestionModel).where(QuestionModel.id == question_id)
+        stmt = select(QuestionModel).where(QuestionModel.image_path.contains(filename))
+        result = await db_session.execute(stmt)
+        questions = result.scalars().all()
+
+        return questions
+
+    async def delete_by_filename(
+        self,
+        filename: str,
+        db_session: AsyncSession,
+    ):
+        stmt = delete(QuestionModel).where(QuestionModel.image_path.contains(filename))
         await db_session.execute(stmt)
         await db_session.commit()
 

@@ -109,7 +109,10 @@ async def user_delete(
     )
 
 
-@router.post("/user/delete")
+@router.post(
+    "/user/delete",
+    response_class=HTMLResponse,
+)
 async def user_delete_post(
     request: Request,
     username: str = Form(...),
