@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block content %}
 <div class="user-function">
-    <h2>新增使用者功能</h2>
+    <h2>新增單一使用者功能</h2>
     <p>輸入以下資訊，新增使用者</p>
     <form action="/teacher/user/create" method="post">
         <label for="username">帳號 (身分證字號)</label>
@@ -16,10 +16,29 @@
         </select>
         <button type="submit">建立</button>
     </form>
-    {% if error %}
-    <p style="color: red">{{ error }}</p>
-    {% endif %} {% if success %}
-    <p style="color: green">{{ success }}</p>
+    {% if error_single %}
+    <p style="color: red">{{ error_single }}</p>
+    {% endif %} {% if success_single %}
+    <p style="color: green">{{ success_single }}</p>
+    {% endif %}
+</div>
+
+<div class="user-function">
+    <h2>新增多個使用者功能</h2>
+    <p>輸入 csv 檔，一次新增多個使用者</p>
+    <form
+        action="/teacher/users/create"
+        method="post"
+        enctype="multipart/form-data"
+    >
+        <label for="file">選擇要上傳的 csv 檔</label>
+        <input type="file" name="file" id="file" required />
+        <button type="submit">建立</button>
+    </form>
+    {% if error_multiple %}
+    <p style="color: red">{{ error_multiple }}</p>
+    {% endif %} {% if success_multiple %}
+    <p style="color: green">{{ success_multiple }}</p>
     {% endif %}
 </div>
 {% endblock %}
