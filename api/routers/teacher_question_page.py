@@ -132,8 +132,8 @@ async def question_delete_post(
         return _403_NOT_A_TEACHER
 
     # Check if the question(s) to be deleted exist(s)
-    deleted_questions = await QuestionCrud.get_by_filename(filename)
-    if not deleted_questions:
+    questions_to_delete = await QuestionCrud.get_by_filename(filename)
+    if not questions_to_delete:
         return templates.TemplateResponse(
             "question_delete.html",
             {

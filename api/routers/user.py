@@ -15,6 +15,7 @@ UserCrud = UserCrudManager()
     "",
     response_model=UserSchema.UserRead,
     status_code=status.HTTP_201_CREATED,
+    deprecated=True,
 )
 async def create_user(newUser: UserSchema.UserCreate):
     """
