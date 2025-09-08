@@ -8,7 +8,7 @@ from uuid import uuid4
 from .depends import get_current_user
 from api.response import (
     _400_INVALID_ANSWER_FORMAT_API,
-    _400_INVALID_FILE_TYPE_API,
+    _400_INVALID_JPG_TYPE_API,
     _403_INVALID_IMAGE_TOKEN_API,
     _403_IMAGE_TOKEN_EXPIRED_API,
     _404_IMAGE_FILE_NOT_FOUND_API,
@@ -51,7 +51,7 @@ async def create_question(
 
     # File type check
     if file.content_type not in ["image/jpeg"]:
-        raise _400_INVALID_FILE_TYPE_API
+        raise _400_INVALID_JPG_TYPE_API
 
     # Write file to disk
     try:
@@ -110,5 +110,5 @@ async def get_question_image(
     question = await QuestionCrud.get(question_id)
     if not question or not Path(question.image_path).exists():
         raise _404_IMAGE_FILE_NOT_FOUND_API
-
+    
     return FileResponse(question.image_path, media_type="image/jpeg")

@@ -129,6 +129,17 @@ async def multiple_user_create_post(
     if current_user.role != Role.TEACHER:
         return _403_NOT_A_TEACHER
 
+    # Check if the uploaded file is a CSV file
+    if file.content_type != "text/csv":
+        return templates.TemplateResponse(
+            "user_create.html",
+            {
+                "request": request,
+                "current_user": current_user,
+                "error_multiple": "上傳檔案格式錯誤，請上傳 CSV 檔案",
+            },
+        )
+
     # Read csv file
     content = await file.read()
     f = StringIO(content.decode("utf-8"))
@@ -158,7 +169,7 @@ async def multiple_user_create_post(
 
     # Render user_create.html
     if fail_to_add:
-        user_list = ','.join(fail_to_add)
+        user_list = ",".join(fail_to_add)
         return templates.TemplateResponse(
             "user_create.html",
             {

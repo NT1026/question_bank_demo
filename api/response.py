@@ -56,12 +56,12 @@ _409_USER_EXISTS_API = HTTPException(
 # Question API Responses
 _400_INVALID_ANSWER_FORMAT_API = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
-    detail="Answer must be combination of A/B/C/D, 1~4 characters",
+    detail="Invalid answer format",
 )
 
-_400_INVALID_FILE_TYPE_API = HTTPException(
+_400_INVALID_JPG_TYPE_API = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
-    detail="File must be a JPG image",
+    detail="Invalid file type, only JPG is allowed",
 )
 
 _403_INVALID_IMAGE_TOKEN_API = HTTPException(
@@ -86,7 +86,7 @@ _404_QUESTION_NOT_FOUND_API = HTTPException(
 
 _500_CREATE_QUESTION_FAILED_API = HTTPException(
     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    detail=f"Failed to save file",
+    detail="Create question failed",
 )
 
 # Exam Record API Responses
