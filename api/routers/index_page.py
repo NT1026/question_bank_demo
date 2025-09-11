@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
@@ -8,11 +7,9 @@ from api.response import (
     _302_REDIRECT_TO_HOME,
     _302_REDIRECT_TO_STUDENT_DASHBOARD,
     _302_REDIRECT_TO_TEACHER_DASHBOARD,
-    _401_LOGIN_FAILED,
     _403_NOT_A_STUDENT,
     _403_NOT_A_TEACHER,
 )
-from auth.passwd import verify_password
 from crud.exam_record import ExamRecordCrudManager
 from crud.user import UserCrudManager
 from models.base import Role
@@ -57,10 +54,7 @@ async def get_exam_summary(ids):
     }
 
 
-@router.get(
-    "/",
-    response_class=HTMLResponse,
-)
+@router.get("/", response_class=HTMLResponse)
 async def index_page(
     request: Request,
     current_user=Depends(get_current_user),
@@ -83,10 +77,7 @@ async def index_page(
         return _302_REDIRECT_TO_TEACHER_DASHBOARD
 
 
-@router.get(
-    "/student/dashboard",
-    response_class=HTMLResponse,
-)
+@router.get("/student/dashboard", response_class=HTMLResponse)
 async def student_dashboard(
     request: Request,
     current_user=Depends(get_current_user),
@@ -124,10 +115,7 @@ async def student_dashboard(
     )
 
 
-@router.get(
-    "/teacher/dashboard",
-    response_class=HTMLResponse,
-)
+@router.get("/teacher/dashboard", response_class=HTMLResponse)
 async def teacher_dashboard(
     request: Request,
     current_user=Depends(get_current_user),
@@ -153,46 +141,3 @@ async def teacher_dashboard(
             "current_user": current_user,
         },
     )
-
-
-@router.post(
-    "/login",
-    response_class=HTMLResponse,
-)
-async def login(
-    request: Request,
-    username: str = Form(...),
-    password: str = Form(...),
-):
-    """
-    登入 API
-    - 輸入：
-        - username：使用者名稱 / 身份證
-        - password：密碼
-    - 檢查使用者是否存在 (用 username / 身份證檢查) 且密碼正確
-    """
-    # Check if user exists and password is correct
-    user = await UserCrud.get_by_username(username)
-    if not user or not verify_password(password, user.password):
-        return _401_LOGIN_FAILED
-
-    # Create session
-    new_session = {
-        "user_id": user.id,
-        "token_expiry": (datetime.now() + timedelta(hours=1)).timestamp(),
-    }
-    request.session.update(new_session)
-    return _302_REDIRECT_TO_HOME
-
-
-@router.get(
-    "/logout",
-    response_class=HTMLResponse,
-)
-async def logout(request: Request):
-    """
-    登出 API
-    - 清除 session
-    """
-    request.session.clear()
-    return _302_REDIRECT_TO_HOME

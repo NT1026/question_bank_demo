@@ -7,12 +7,17 @@ from uvicorn import Config, Server
 
 from settings.configs import Settings
 from .routers import (
+    auth_page_router,
+    exam_page_router,
     index_page_router,
-    question_router,
-    student_page_router,
-    teacher_question_page_router,
-    teacher_user_page_router,
-    user_router,
+    question_api_router,
+    question_create_router,
+    question_delete_router,
+    question_read_router,
+    user_api_router,
+    user_create_router,
+    user_delete_router,
+    user_read_router,
 )
 
 app = FastAPI()
@@ -23,11 +28,19 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Routers
 app.include_router(index_page_router, tags=["Index Page"])
-app.include_router(student_page_router, prefix="/student", tags=["Student Page"])
-app.include_router(teacher_user_page_router, prefix="/teacher", tags=["Teacher Page"])
-app.include_router(teacher_question_page_router, prefix="/teacher", tags=["Teacher Page"])
-app.include_router(user_router, prefix="/api/user", tags=["User"])
-app.include_router(question_router, prefix="/api/question", tags=["Question"])
+app.include_router(auth_page_router, tags=["Auth Page"])
+app.include_router(exam_page_router, prefix="/exam", tags=["Exam Page"])
+
+app.include_router(user_create_router, prefix="/teacher/user/create", tags=["User Create"])
+app.include_router(user_read_router, prefix="/teacher/user/read", tags=["User Read"])
+app.include_router(user_delete_router, prefix="/teacher/user/delete", tags=["User Delete"])
+
+app.include_router(question_create_router, prefix="/teacher/question/create", tags=["Question Create"])
+app.include_router(question_read_router, prefix="/teacher/question/read", tags=["Question Read"])
+app.include_router(question_delete_router, prefix="/teacher/question/delete", tags=["Question Delete"])
+
+app.include_router(user_api_router, prefix="/api/user", tags=["User"])
+app.include_router(question_api_router, prefix="/api/question", tags=["Question"])
 
 # CORS settings
 origins = ["http://127.0.0.1"]  # domain name

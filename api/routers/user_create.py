@@ -20,10 +20,7 @@ templates = Jinja2Templates(directory="templates")
 UserCrud = UserCrudManager()
 
 
-@router.get(
-    "/user/create",
-    response_class=HTMLResponse,
-)
+@router.get("", response_class=HTMLResponse)
 async def user_create(
     request: Request,
     current_user=Depends(get_current_user),
@@ -51,10 +48,7 @@ async def user_create(
     )
 
 
-@router.post(
-    "/user/create",
-    response_class=HTMLResponse,
-)
+@router.post("", response_class=HTMLResponse)
 async def single_user_create_post(
     request: Request,
     username: str = Form(...),
@@ -107,10 +101,7 @@ async def single_user_create_post(
     )
 
 
-@router.post(
-    "/users/create",
-    response_class=HTMLResponse,
-)
+@router.post("/bulk", response_class=HTMLResponse)
 async def multiple_user_create_post(
     request: Request,
     file: UploadFile = File(...),
@@ -185,113 +176,5 @@ async def multiple_user_create_post(
             "request": request,
             "current_user": current_user,
             "success_multiple": f"csv 中所有使用者皆新增完成",
-        },
-    )
-
-
-@router.get(
-    "/user/read",
-    response_class=HTMLResponse,
-)
-async def user_read(
-    request: Request,
-    current_user=Depends(get_current_user),
-):
-    """
-    使用者列表頁面
-    - 未登入使用者無法進入使用者列表頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入使用者列表頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可進入使用者列表頁面
-    """
-    # Check if user is teacher
-    if not current_user:
-        return _302_REDIRECT_TO_HOME
-
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
-
-    # Render user_read.html
-    return templates.TemplateResponse(
-        "user_read.html",
-        {
-            "request": request,
-            "current_user": current_user,
-        },
-    )
-
-
-@router.get(
-    "/user/delete",
-    response_class=HTMLResponse,
-)
-async def user_delete(
-    request: Request,
-    current_user=Depends(get_current_user),
-):
-    """
-    刪除使用者頁面
-    - 未登入使用者無法進入刪除使用者頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入刪除使用者頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可進入刪除使用者頁面
-    """
-    # Check if user is teacher
-    if not current_user:
-        return _302_REDIRECT_TO_HOME
-
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
-
-    # Render user_delete.html
-    return templates.TemplateResponse(
-        "user_delete.html",
-        {
-            "request": request,
-            "current_user": current_user,
-        },
-    )
-
-
-@router.post(
-    "/user/delete",
-    response_class=HTMLResponse,
-)
-async def user_delete_post(
-    request: Request,
-    username: str = Form(...),
-    current_user=Depends(get_current_user),
-):
-    """
-    刪除使用者頁面的 POST 請求處理
-    - 未登入使用者無法進入刪除使用者頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入刪除使用者頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可提交刪除使用者請求
-    """
-    # Check if user is teacher
-    if not current_user:
-        return _302_REDIRECT_TO_HOME
-
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
-
-    # Check if the user to be deleted exists
-    user_to_delete = await UserCrud.get_by_username(username)
-    if not user_to_delete:
-        return templates.TemplateResponse(
-            "user_delete.html",
-            {
-                "request": request,
-                "current_user": current_user,
-                "error": f"找不到該使用者帳號：{username}",
-            },
-        )
-
-    # Delete the user
-    await UserCrud.delete_by_username(username)
-    return templates.TemplateResponse(
-        "user_delete.html",
-        {
-            "request": request,
-            "current_user": current_user,
-            "success": f"已刪除使用者帳號：{username}",
         },
     )

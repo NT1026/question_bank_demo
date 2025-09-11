@@ -24,10 +24,7 @@ ExamRecordCrud = ExamRecordCrudManager()
 QuestionCrud = QuestionCrudManager()
 
 
-@router.get(
-    "/exam/{subject_type}",
-    response_class=HTMLResponse,
-)
+@router.get("/{subject_type}", response_class=HTMLResponse)
 async def exam_page(
     request: Request,
     subject_type: str,
@@ -73,10 +70,7 @@ async def exam_page(
     )
 
 
-@router.post(
-    "/exam/submit/{subject_type}",
-    response_class=HTMLResponse,
-)
+@router.post("/submit/{subject_type}", response_class=HTMLResponse)
 async def submit_exam(
     request: Request,
     subject_type: str,
@@ -132,10 +126,7 @@ async def submit_exam(
     )
 
 
-@router.get(
-    "/exam/record/{exam_record_id}",
-    response_class=HTMLResponse,
-)
+@router.get("/record/{exam_record_id}", response_class=HTMLResponse)
 async def get_exam_record(
     request: Request,
     exam_record_id: str,

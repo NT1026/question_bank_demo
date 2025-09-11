@@ -1,6 +1,11 @@
+from .auth_page import router as auth_page_router
+from .exam_page import router as exam_page_router
 from .index_page import router as index_page_router
-from .question import router as question_router
-from .student_page import router as student_page_router
-from .teacher_question_page import router as teacher_question_page_router
-from .teacher_user_page import router as teacher_user_page_router
-from .user import router as user_router
+from .question_api import router as question_api_router
+from .question_create import router as question_create_router
+from .question_delete import router as question_delete_router
+from .question_read import router as question_read_router
+from .user_api import router as user_api_router
+from .user_create import router as user_create_router
+from .user_delete import router as user_delete_router
+from .user_read import router as user_read_router

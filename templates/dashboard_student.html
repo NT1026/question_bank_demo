@@ -2,10 +2,10 @@
 <div class="selection">
     <h2>開始測驗</h2>
     <div>
-        <a href="/student/exam/math_achievement">數學成就測驗</a>
-        <a href="/student/exam/math_aptitude">數學性向測驗</a>
-        <a href="/student/exam/nature_science_achievement">自然成就測驗</a>
-        <a href="/student/exam/nature_science_aptitude">自然性向測驗</a>
+        <a href="/exam/math_achievement">數學成就測驗</a>
+        <a href="/exam/math_aptitude">數學性向測驗</a>
+        <a href="/exam/nature_science_achievement">自然成就測驗</a>
+        <a href="/exam/nature_science_aptitude">自然性向測驗</a>
     </div>
 </div>
 
@@ -26,7 +26,7 @@
         <p>測驗時間：{{ exam.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
         <p>答題狀況：{{ exam.score }} / {{ exam.question_count }}</p>
         <p>答對率：{{ exam.accuracy }}</p>
-        <a href="/student/exam/record/{{ exam.exam_record_id }}"
+        <a href="/exam/record/{{ exam.exam_record_id }}"
             >查看測驗紀錄</a
         >
     </div>
@@ -50,7 +50,7 @@
         <p>測驗時間：{{ exam.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
         <p>答題狀況：{{ exam.score }} / {{ exam.question_count }}</p>
         <p>答對率：{{ exam.accuracy }}</p>
-        <a href="/student/exam/record/{{ exam.exam_record_id }}"
+        <a href="/exam/record/{{ exam.exam_record_id }}"
             >查看測驗紀錄</a
         >
     </div>
@@ -76,7 +76,7 @@
         <p>測驗時間：{{ exam.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
         <p>答題狀況：{{ exam.score }} / {{ exam.question_count }}</p>
         <p>答對率：{{ exam.accuracy }}</p>
-        <a href="/student/exam/record/{{ exam.exam_record_id }}"
+        <a href="/exam/record/{{ exam.exam_record_id }}"
             >查看測驗紀錄</a
         >
     </div>
@@ -100,7 +100,7 @@
         <p>測驗時間：{{ exam.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
         <p>答題狀況：{{ exam.score }} / {{ exam.question_count }}</p>
         <p>答對率：{{ exam.accuracy }}</p>
-        <a href="/student/exam/record/{{ exam.exam_record_id }}"
+        <a href="/exam/record/{{ exam.exam_record_id }}"
             >查看測驗紀錄</a
         >
     </div>
