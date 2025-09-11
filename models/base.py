@@ -11,6 +11,18 @@ class Role(str, Enum):
     TEACHER = "teacher"
 
 
+class Subject(str, Enum):
+    MATH = "math"
+    NATURE_SCIENCE = "nature_science"
+
+
+class Exam_type(str, Enum):
+    MATH_ACHIEVEMENT = "math_achievement"
+    MATH_APTITUDE = "math_aptitude"
+    NATURE_SCIENCE_ACHIEVEMENT = "nature_science_achievement"
+    NATURE_SCIENCE_APTITUDE = "nature_science_aptitude"
+
+
 class Base(DeclarativeBase):
     pass
 
