@@ -47,7 +47,7 @@ class QuestionCrudManager:
         questions = result.scalars().all()
 
         return questions
-    
+
     async def get_by_filename(
         self,
         filename: str,
@@ -55,9 +55,9 @@ class QuestionCrudManager:
     ):
         stmt = select(QuestionModel).where(QuestionModel.image_path.contains(filename))
         result = await db_session.execute(stmt)
-        questions = result.scalars().all()
+        question = result.scalar_one_or_none()
 
-        return questions
+        return question
 
     async def delete_by_filename(
         self,

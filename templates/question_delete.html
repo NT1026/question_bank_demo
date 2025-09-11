@@ -2,9 +2,8 @@
 <div class="question-function">
     <h2>刪除題目功能</h2>
     <p>輸入題目編號，刪除指定題目</p>
-    <p>題目編號格式：M-xxxx、N-xxxx</p>
     <form action="/teacher/question/delete" method="post">
-        <label for="filename">題目檔案名稱</label>
+        <label for="filename">題目編號 (格式：M-xxxx / N-xxxx)</label>
         <input type="text" id="filename" name="filename" required />
         <button type="submit">刪除</button>
     </form>
