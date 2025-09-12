@@ -121,7 +121,7 @@ async def submit_exam(
 
     # Redirect to exam record page
     return RedirectResponse(
-        f"/student/exam/record/{exam_record.id}",
+        f"/exam/record/{exam_record.id}",
         status_code=status.HTTP_302_FOUND,
     )
 
@@ -135,20 +135,18 @@ async def get_exam_record(
     """
     測驗結果頁面
     - 未登入使用者無法進入測驗結果頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非學生，無法進入測驗結果頁面，會回應 403 錯誤
+    - 已登入使用者，且使用者角色為非學生，可查看學生測驗結果 (/teacher/user/read)
     - 已登入使用者，且使用者角色為學生，可進入測驗結果頁面
     """
-    # Check if user is student
+    # Check if user is login
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.STUDENT:
-        return _403_NOT_A_STUDENT
-
     # Get exam_record data
     exam_record = await ExamRecordCrud.get(exam_record_id)
-    if not exam_record or exam_record.user_id != current_user.id:
+    if not (exam_record and (exam_record.user_id == current_user.id or current_user.role == Role.TEACHER)):
         return _404_EXAM_RECORD_NOT_FOUND
+
 
     # Rendering user_answers data
     rendered_user_answers = await ExamRecordCrud.get_user_answers_data(
@@ -164,7 +162,7 @@ async def get_exam_record(
             "current_user": current_user,
             "subject": SUBJECT_EXAM_INFO[exam_record.subject_type],
             "score": exam_record.score,
-            "accuracy": f"{(exam_record.score / len(exam_record.user_answers)) * 100:.2f}%",
+            "accuracy": f"{(exam_record.score / len(exam_record.user_answers)) * 100:.2f}%" if exam_record.user_answers else "0.00%",
             "user_answers": rendered_user_answers,
         },
     )

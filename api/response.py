@@ -17,6 +17,11 @@ _302_REDIRECT_TO_TEACHER_DASHBOARD = RedirectResponse(
     status_code=status.HTTP_302_FOUND,
 )
 
+_400_CANNOT_READ_TEACHER = HTMLResponse(
+    "無法讀取教師詳細資料",
+    status_code=status.HTTP_400_BAD_REQUEST,
+)
+
 _401_LOGIN_FAILED = HTMLResponse(
     "登入失敗",
     status_code=status.HTTP_401_UNAUTHORIZED,

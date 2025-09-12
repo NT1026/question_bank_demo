@@ -1,3 +1,16 @@
 {% extends "base.html" %} {% block content %}
-<p>user_read page</p>
+<div class="user-function">
+    <h2>查詢指定學生功能</h2>
+    <p>輸入指定帳號，查詢指定學生資訊</p>
+    <form action="/teacher/user/read" method="post">
+        <label for="username">帳號 (身分證字號)</label>
+        <input type="text" id="username" name="username" required />
+        <button type="submit">查詢</button>
+    </form>
+    {% if error_single %}
+    <p style="color: red">{{ error_single }}</p>
+    {% endif %} {% if success_single %}
+    <p style="color: green">{{ success_single }}</p>
+    {% endif %}
+</div>
 {% endblock %}

@@ -1,4 +1,5 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} {% block content %} {% if current_user.role ==
+"student" %}
 <div class="selection">
     <h2>開始測驗</h2>
     <div>
@@ -8,6 +9,16 @@
         <a href="/exam/nature_science_aptitude">自然性向測驗</a>
     </div>
 </div>
+{% elif current_user.role == "teacher" %}
+<div class="exam-record-list">
+    <h2>學生資訊</h2>
+    <div>
+        <p>姓名：{{ student_info.name }}</p>
+        <p>帳號 (身分證字號)：{{ student_info.username }}</p>
+        <p>創建時間：{{ student_info.created_at }}</p>
+    </div>
+</div>
+{% endif %}
 
 <div class="exam-record-list">
     <h2>數學成就測驗紀錄</h2>
@@ -26,9 +37,7 @@
         <p>測驗時間：{{ exam.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
         <p>答題狀況：{{ exam.score }} / {{ exam.question_count }}</p>
         <p>答對率：{{ exam.accuracy }}</p>
-        <a href="/exam/record/{{ exam.exam_record_id }}"
-            >查看測驗紀錄</a
-        >
+        <a href="/exam/record/{{ exam.exam_record_id }}">查看測驗紀錄</a>
     </div>
     {% endfor %}
 </div>
@@ -50,9 +59,7 @@
         <p>測驗時間：{{ exam.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
         <p>答題狀況：{{ exam.score }} / {{ exam.question_count }}</p>
         <p>答對率：{{ exam.accuracy }}</p>
-        <a href="/exam/record/{{ exam.exam_record_id }}"
-            >查看測驗紀錄</a
-        >
+        <a href="/exam/record/{{ exam.exam_record_id }}">查看測驗紀錄</a>
     </div>
     {% endfor %}
 </div>
@@ -76,9 +83,7 @@
         <p>測驗時間：{{ exam.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
         <p>答題狀況：{{ exam.score }} / {{ exam.question_count }}</p>
         <p>答對率：{{ exam.accuracy }}</p>
-        <a href="/exam/record/{{ exam.exam_record_id }}"
-            >查看測驗紀錄</a
-        >
+        <a href="/exam/record/{{ exam.exam_record_id }}">查看測驗紀錄</a>
     </div>
     {% endfor %}
 </div>
@@ -100,9 +105,7 @@
         <p>測驗時間：{{ exam.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
         <p>答題狀況：{{ exam.score }} / {{ exam.question_count }}</p>
         <p>答對率：{{ exam.accuracy }}</p>
-        <a href="/exam/record/{{ exam.exam_record_id }}"
-            >查看測驗紀錄</a
-        >
+        <a href="/exam/record/{{ exam.exam_record_id }}">查看測驗紀錄</a>
     </div>
     {% endfor %}
 </div>
