@@ -127,19 +127,11 @@ async def multiple_user_delete_post(
             error_usernames.append(username)
 
     success_message = (
-        (
-            f"已刪除使用者帳號：{', '.join(success_usernames)}"
-            if success_usernames
-            else ""
-        )
-        if success_usernames
-        else ""
+        f"已刪除使用者帳號：{', '.join(success_usernames)}" if success_usernames else ""
     )
 
     error_message = (
-        (f"找不到使用者帳號：{', '.join(error_usernames)}" if error_usernames else "")
-        if error_usernames
-        else ""
+        (f"找不到使用者帳號：{', '.join(error_usernames)}") if error_usernames else ""
     )
 
     return templates.TemplateResponse(
