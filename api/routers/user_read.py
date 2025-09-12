@@ -1,11 +1,14 @@
+from csv import writer
+from datetime import datetime
 from fastapi import APIRouter, Depends, Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
+from io import StringIO
+from pathlib import Path
 
 from .depends import get_current_user
 from api.response import (
     _302_REDIRECT_TO_HOME,
-    _400_CANNOT_READ_TEACHER,
     _403_NOT_A_TEACHER,
 )
 from crud.exam_record import ExamRecordCrudManager
@@ -81,7 +84,14 @@ async def single_user_read_post(
         )
 
     if student.role != Role.STUDENT:
-        return _400_CANNOT_READ_TEACHER
+        return templates.TemplateResponse(
+            "user_read.html",
+            {
+                "request": request,
+                "current_user": current_user,
+                "error_single": "無法讀取教師詳細資訊",
+            },
+        )
 
     # Get all exam info of current student
     exam_records = await ExamRecordCrud.get_by_user_id(student.id)
@@ -101,4 +111,43 @@ async def single_user_read_post(
             "student_info": student,
             "exam_lists": exam_lists,
         },
+    )
+
+
+@router.post("/bulk", response_class=HTMLResponse)
+async def multiple_user_read_post(
+    request: Request,
+    current_user=Depends(get_current_user),
+):
+    """
+    查詢多位使用者資訊，並輸出成 csv
+    - 未登入使用者無法進入使用者列表頁面，會被導向首頁
+    - 已登入使用者，且使用者角色為非老師，無法進入使用者列表頁面，會回應 403 錯誤
+    - 已登入使用者，且使用者角色為老師，可進入使用者列表頁面
+    """
+    # Check if user is teacher
+    if not current_user:
+        return _302_REDIRECT_TO_HOME
+
+    if current_user.role != Role.TEACHER:
+        return _403_NOT_A_TEACHER
+
+    # Check if the user(s) to be viewed exist(s)
+    all_users = await UserCrud.get_all()
+
+    # Generate CSV content
+    buffer = StringIO()
+    csv_writer = writer(buffer)
+    csv_writer.writerow(["username", "name", "role", "created_at"])
+    for user in all_users:
+        csv_writer.writerow([user.username, user.name, user.role, user.created_at])
+    buffer.seek(0)
+
+    # Return CSV as downloadable file
+    csv_filename = f"all_users_info_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    csv_headers = {"Content-Disposition": f"attachment; filename={csv_filename}"}
+    return StreamingResponse(
+        buffer.getvalue(),
+        media_type="text/csv",
+        headers=csv_headers,
     )

@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block content %}
 <div class="user-function">
-    <h2>查詢指定學生功能</h2>
+    <h2>查詢指定學生紀錄功能</h2>
     <p>輸入指定帳號，查詢指定學生資訊</p>
     <form action="/teacher/user/read" method="post">
         <label for="username">帳號 (身分證字號)</label>
@@ -12,5 +12,13 @@
     {% endif %} {% if success_single %}
     <p style="color: green">{{ success_single }}</p>
     {% endif %}
+</div>
+
+<div class="user-function">
+    <h2>列出所有使用者功能</h2>
+    <p>將所有使用者的詳細資訊輸出到 csv 檔案中</p>
+    <form action="/teacher/user/read/bulk" method="post">
+        <button type="submit">產生</button>
+    </form>
 </div>
 {% endblock %}
