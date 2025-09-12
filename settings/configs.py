@@ -10,6 +10,10 @@ class Settings:
         self.APP_NAME = self.configs["app"]["name"]
         self.APP_HOST = self.configs["app"]["host"]
         self.APP_PORT = self.configs["app"]["port"]
+        
+        # Admin settings
+        self.ADMIN_USERNAME = self.configs["admin"]["username"]
+        self.ADMIN_PASSWORD = self.configs["admin"]["password"]
 
         # Database settings
         self.DB_HOST = self.configs["mysql"]["host"]

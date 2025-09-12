@@ -11,8 +11,10 @@ from api.response import (
 )
 from crud.user import UserCrudManager
 from models.base import Role
+from settings.configs import Settings
 
 router = APIRouter()
+settings = Settings()
 templates = Jinja2Templates(directory="templates")
 
 UserCrud = UserCrudManager()
@@ -64,6 +66,17 @@ async def single_user_delete_post(
 
     if current_user.role != Role.TEACHER:
         return _403_NOT_A_TEACHER
+    
+    # Prevent deletion of admin account
+    if username == settings.ADMIN_USERNAME:
+        return templates.TemplateResponse(
+            "user_delete.html",
+            {
+                "request": request,
+                "current_user": current_user,
+                "error_single": "無法刪除管理者帳號",
+            },
+        )
 
     # Check if the user to be deleted exists
     user_to_delete = await UserCrud.get_by_username(username)
@@ -118,6 +131,10 @@ async def multiple_user_delete_post(
 
     for row in csv_reader:
         username = row.get("username")
+        if username == settings.ADMIN_USERNAME:
+            error_usernames.append(username)
+            continue
+
         user_to_delete = await UserCrud.get_by_username(username)
         if user_to_delete:
             await UserCrud.delete_by_username(username)

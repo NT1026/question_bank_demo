@@ -7,6 +7,7 @@ from typing import Annotated
 
 
 class Role(str, Enum):
+    ADMIN = "admin"
     STUDENT = "student"
     TEACHER = "teacher"
 
