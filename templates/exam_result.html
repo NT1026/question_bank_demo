@@ -1,7 +1,9 @@
 {% extends "base.html" %} {% block content %}
 <div class="exam-container">
     <h1>{{ subject.chinese_name }} 測驗結果</h1>
-    <p class="exam-result">你的分數：{{ score }} / {{ user_answers | length }}</p>
+    <p class="exam-result">
+        你的分數：{{ score }} / {{ user_answers | length }}
+    </p>
     <p class="exam-result">總答對率：{{ accuracy }}</p>
 
     <form>
@@ -23,10 +25,15 @@
         </div>
         {% endfor %}
     </form>
-
+    {% if current_user.role == "student" %}
     <div class="result-actions">
         <a href="/">回首頁</a>
         <a href="/exam/{{ subject.name }}">重新考試</a>
     </div>
+    {% endif %} {% if current_user.role == "teacher" or current_user.role == "admin" %}
+    <div class="result-actions">
+        <a href="javascript:history.back()">上一頁</a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -1,13 +1,12 @@
 from csv import DictReader
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from io import StringIO
 
 from .depends import get_current_user
 from api.response import (
     _302_REDIRECT_TO_HOME,
-    _403_NOT_A_TEACHER,
+    _403_NOT_A_ADMIN_OR_TEACHER,
 )
 from auth.passwd import get_password_hash
 from crud.user import UserCrudManager
@@ -20,23 +19,18 @@ templates = Jinja2Templates(directory="templates")
 UserCrud = UserCrudManager()
 
 
-@router.get("", response_class=HTMLResponse)
+@router.get("")
 async def user_create(
     request: Request,
     current_user=Depends(get_current_user),
 ):
-    """
-    新增使用者頁面
-    - 未登入使用者無法進入新增使用者頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入新增使用者頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可進入新增使用者頁面
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
 
     # Render user_create.html
     return templates.TemplateResponse(
@@ -48,7 +42,7 @@ async def user_create(
     )
 
 
-@router.post("", response_class=HTMLResponse)
+@router.post("")
 async def single_user_create_post(
     request: Request,
     username: str = Form(...),
@@ -57,18 +51,24 @@ async def single_user_create_post(
     role: Role = Form(...),
     current_user=Depends(get_current_user),
 ):
-    """
-    新增使用者頁面的 POST 請求處理
-    - 未登入使用者無法進入新增使用者頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入新增使用者頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可提交新增單一使用者請求
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
+
+    # Check if want to add an admin user
+    if role == Role.ADMIN:
+        return templates.TemplateResponse(
+            "user_create.html",
+            {
+                "request": request,
+                "current_user": current_user,
+                "error_single": "無法新增管理員帳號",
+            },
+        )
 
     # Check if user with the same username already exists
     user_to_add = await UserCrud.get_by_username(username)
@@ -101,24 +101,19 @@ async def single_user_create_post(
     )
 
 
-@router.post("/bulk", response_class=HTMLResponse)
+@router.post("/bulk")
 async def multiple_user_create_post(
     request: Request,
     file: UploadFile = File(...),
     current_user=Depends(get_current_user),
 ):
-    """
-    新增使用者頁面的 POST 請求處理
-    - 未登入使用者無法進入新增使用者頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入新增使用者頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可提交新增多個使用者請求
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
 
     # Check if the uploaded file is a CSV file
     if file.content_type != "text/csv":
@@ -131,50 +126,66 @@ async def multiple_user_create_post(
             },
         )
 
-    # Read csv file
-    content = await file.read()
-    f = StringIO(content.decode("utf-8"))
-    reader = DictReader(f)
+    # Check CSV file content and create users
+    try:
+        content = await file.read()
+        f = StringIO(content.decode("utf-8"))
+        reader = DictReader(f)
 
-    # Create users
-    fail_to_add = []
-    for row in reader:
-        username = row["username"].strip()
-        password = row["password"].strip()
-        name = row["name"].strip()
-        role = row["role"].strip()
+        # Create users
+        success_to_add = []
+        fail_to_add = []
+        for row in reader:
+            username = row["username"].strip()
+            password = row["password"].strip()
+            name = row["name"].strip()
+            role = row["role"].strip()
 
-        # Check if user with the same username already exists
-        user_to_add = await UserCrud.get_by_username(username)
-        if not user_to_add:
-            newUser = UserSchema.UserCreate(
-                username=username,
-                password=password,
-                name=name,
-                role=role,
-            )
-            newUser.password = get_password_hash(newUser.password)
-            await UserCrud.create(newUser)
-        else:
-            fail_to_add.append(username)
+            # Check if user_to_add is admin
+            if role == Role.ADMIN:
+                fail_to_add.append(f"{username}(無法新增管理員帳號)")
+                continue
 
-    # Render user_create.html
-    if fail_to_add:
-        user_list = ",".join(fail_to_add)
+            # Check if user with the same username already exists
+            user_to_add = await UserCrud.get_by_username(username)
+            if not user_to_add:
+                newUser = UserSchema.UserCreate(
+                    username=username,
+                    password=password,
+                    name=name,
+                    role=role,
+                )
+                newUser.password = get_password_hash(newUser.password)
+                await UserCrud.create(newUser)
+                success_to_add.append(username)
+            else:
+                fail_to_add.append(username)
+
+    except Exception:
         return templates.TemplateResponse(
             "user_create.html",
             {
                 "request": request,
                 "current_user": current_user,
-                "error_multiple": f"以下使用者新增失敗：{user_list}",
+                "error_multiple": "CSV 檔案格式錯誤，請確認檔案內容",
             },
         )
+
+    # Render user_create.html
+    success_message = (
+        f"以下使用者新增成功：{', '.join(success_to_add)}" if success_to_add else ""
+    )
+
+    error_message = (
+        (f"以下使用者新增失敗：{', '.join(fail_to_add)}") if fail_to_add else ""
+    )
 
     return templates.TemplateResponse(
         "user_create.html",
         {
             "request": request,
             "current_user": current_user,
-            "success_multiple": f"csv 中所有使用者皆新增完成",
+            "success_multiple": success_message,
+            "error_multiple": error_message,
         },
     )

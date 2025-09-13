@@ -1,62 +1,45 @@
 from fastapi import APIRouter, Depends, Request, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from random import sample
 
 from .depends import get_current_user
 from api.response import (
     _302_REDIRECT_TO_HOME,
+    _403_CANNOT_ACCESS_OTHER_USER_DATA,
     _403_NOT_A_STUDENT,
-    _404_SUBJECT_NOT_FOUND,
+    _403_NOT_A_TEACHER_OR_STUDENT,
     _404_EXAM_RECORD_NOT_FOUND,
+    _404_EXAM_TYPE_NOT_FOUND,
 )
-from auth.image import generate_image_token
 from crud.exam_record import ExamRecordCrudManager
-from crud.question import QuestionCrudManager
 from models.base import Role
 from schemas import exam_record as ExamRecordSchema
 from settings.subject import SUBJECT_EXAM_INFO
+from utils.exam import random_choose_questions
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
 ExamRecordCrud = ExamRecordCrudManager()
-QuestionCrud = QuestionCrudManager()
 
 
-@router.get("/{subject_type}", response_class=HTMLResponse)
+@router.get("/{exam_type}")
 async def exam_page(
     request: Request,
-    subject_type: str,
+    exam_type: str,
     current_user=Depends(get_current_user),
 ):
-    """
-    產生考卷頁面
-    - 未登入使用者無法進入考試頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非學生，無法進入考試頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為學生，可進入考試頁面
-    """
-    # Check if user is student
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
+    # Check if user is student
     if current_user.role != Role.STUDENT:
         return _403_NOT_A_STUDENT
 
-    # If logged in, check subject is valid
-    if subject_type not in SUBJECT_EXAM_INFO:
-        return _404_SUBJECT_NOT_FOUND
-
-    # Get 30 random questions from database
-    subject = SUBJECT_EXAM_INFO[subject_type]["subject"]
-    questions = await QuestionCrud.get_by_subject(subject)
-
-    question_num = SUBJECT_EXAM_INFO[subject_type]["question_count"]
-    selected_quesions = sample(questions, min(question_num, len(questions)))
-
-    # Generate image token for each question
-    for question in selected_quesions:
-        question.token = generate_image_token(str(current_user.id), question.id)
+    # Check exam_type is valid
+    if exam_type not in SUBJECT_EXAM_INFO:
+        return _404_EXAM_TYPE_NOT_FOUND
 
     # Render exam.html
     return templates.TemplateResponse(
@@ -64,34 +47,29 @@ async def exam_page(
         {
             "request": request,
             "current_user": current_user,
-            "subject": SUBJECT_EXAM_INFO[subject_type],
-            "questions": selected_quesions,
+            "subject": SUBJECT_EXAM_INFO[exam_type],
+            "questions": await random_choose_questions(exam_type, current_user.id),
         },
     )
 
 
-@router.post("/submit/{subject_type}", response_class=HTMLResponse)
+@router.post("/submit/{exam_type}")
 async def submit_exam(
     request: Request,
-    subject_type: str,
+    exam_type: str,
     current_user=Depends(get_current_user),
 ):
-    """
-    提交考卷表單
-    - 未登入使用者無法提交考卷，會被導向首頁
-    - 已登入使用者，且使用者角色為非學生，無法提交考卷，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為學生，可提交考卷
-    """
-    # Check if user is student
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
+    # Check if user is student
     if current_user.role != Role.STUDENT:
         return _403_NOT_A_STUDENT
 
-    # If logged in, check subject is valid
-    if subject_type not in SUBJECT_EXAM_INFO:
-        return _404_SUBJECT_NOT_FOUND
+    # Check exam_type is valid
+    if exam_type not in SUBJECT_EXAM_INFO:
+        return _404_EXAM_TYPE_NOT_FOUND
 
     # Get user_answer list
     form = await request.form()
@@ -111,7 +89,7 @@ async def submit_exam(
 
     # Create new exam record into database
     new_exam_record = ExamRecordSchema.ExamRecordCreate(
-        subject_type=subject_type,
+        exam_type=exam_type,
         user_answers=user_answers,
     )
     exam_record = await ExamRecordCrud.create(
@@ -126,31 +104,38 @@ async def submit_exam(
     )
 
 
-@router.get("/record/{exam_record_id}", response_class=HTMLResponse)
+@router.get("/record/{exam_record_id}")
 async def get_exam_record(
     request: Request,
     exam_record_id: str,
     current_user=Depends(get_current_user),
 ):
-    """
-    測驗結果頁面
-    - 未登入使用者無法進入測驗結果頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非學生，可查看學生測驗結果 (/teacher/user/read)
-    - 已登入使用者，且使用者角色為學生，可進入測驗結果頁面
-    """
-    # Check if user is login
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    # Get exam_record data
+    # Check if user is student or teacher
+    allowed_roles = [Role.STUDENT, Role.TEACHER]
+    if current_user.role not in allowed_roles:
+        return _403_NOT_A_TEACHER_OR_STUDENT
+
+    # Check exam_record_id is valid
     exam_record = await ExamRecordCrud.get(exam_record_id)
-    if not (exam_record and (exam_record.user_id == current_user.id or current_user.role == Role.TEACHER)):
+    if not exam_record:
         return _404_EXAM_RECORD_NOT_FOUND
 
+    # Check if the exam_record belongs to the current user (if current_user == student)
+    if current_user.role == Role.STUDENT and exam_record.user_id != current_user.id:
+        return _403_CANNOT_ACCESS_OTHER_USER_DATA
 
-    # Rendering user_answers data
-    rendered_user_answers = await ExamRecordCrud.get_user_answers_data(
-        current_user_id=current_user.id,
+    # Prepare data for rendering
+    accuracy = (
+        f"{(exam_record.score / len(exam_record.user_answers)) * 100:.2f}%"
+        if exam_record.user_answers
+        else "0.00%"
+    )
+    rendered_user_answers = await ExamRecordCrud.get_rendered_user_answers_data(
+        user_id=current_user.id,
         exam_record_id=exam_record_id,
     )
 
@@ -160,9 +145,9 @@ async def get_exam_record(
         {
             "request": request,
             "current_user": current_user,
-            "subject": SUBJECT_EXAM_INFO[exam_record.subject_type],
+            "subject": SUBJECT_EXAM_INFO[exam_record.exam_type],
             "score": exam_record.score,
-            "accuracy": f"{(exam_record.score / len(exam_record.user_answers)) * 100:.2f}%" if exam_record.user_answers else "0.00%",
+            "accuracy": accuracy,
             "user_answers": rendered_user_answers,
         },
     )

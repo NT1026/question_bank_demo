@@ -28,7 +28,7 @@ class ExamRecordCrudManager:
         # Create new exam record
         exam_record = ExamRecordModel(
             user_id=user_id,
-            subject_type=newExamRecord.subject_type,
+            exam_type=newExamRecord.exam_type,
             score=score,
             user_answers=newExamRecord.user_answers,
         )
@@ -59,9 +59,9 @@ class ExamRecordCrudManager:
 
         return exam_records
     
-    async def get_user_answers_data(
+    async def get_rendered_user_answers_data(
         self,
-        current_user_id: str,
+        user_id: str,
         exam_record_id: str,
         db_session: AsyncSession,
     ):
@@ -80,7 +80,7 @@ class ExamRecordCrudManager:
                         "answer": question.answer,
                         "user_answer": item["user_answer"],
                         "is_correct": question.answer == item["user_answer"],
-                        "token": generate_image_token(str(current_user_id), question.id),
+                        "token": generate_image_token(str(user_id), question.id),
                     }
                 )
 

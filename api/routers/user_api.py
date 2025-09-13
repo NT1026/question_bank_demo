@@ -13,7 +13,6 @@ UserCrud = UserCrudManager()
 
 @router.post(
     "",
-    response_model=UserSchema.UserRead,
     status_code=status.HTTP_201_CREATED,
     deprecated=True,
 )

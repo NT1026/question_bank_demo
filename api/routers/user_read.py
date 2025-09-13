@@ -1,47 +1,38 @@
 from csv import writer
 from datetime import datetime
 from fastapi import APIRouter, Depends, Form, Request
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from fastapi.templating import Jinja2Templates
 from io import StringIO
-from pathlib import Path
 
 from .depends import get_current_user
 from api.response import (
     _302_REDIRECT_TO_HOME,
-    _403_NOT_A_TEACHER,
+    _403_NOT_A_ADMIN_OR_TEACHER,
 )
-from crud.exam_record import ExamRecordCrudManager
 from crud.user import UserCrudManager
 from models.base import Role
-from settings.subject import SUBJECT_EXAM_INFO
-from utils.exam import get_exam_summary
+from utils.exam import get_exam_render_info
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
-ExamRecordCrud = ExamRecordCrudManager()
 UserCrud = UserCrudManager()
 
 
-@router.get("", response_class=HTMLResponse)
+@router.get("")
 async def user_read(
     request: Request,
     current_user=Depends(get_current_user),
 ):
-    """
-    使用者列表頁面
-    - 未登入使用者無法進入使用者列表頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入使用者列表頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可進入使用者列表頁面
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
-
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
+    
     # Render user_read.html
     return templates.TemplateResponse(
         "user_read.html",
@@ -52,28 +43,23 @@ async def user_read(
     )
 
 
-@router.post("", response_class=HTMLResponse)
+@router.post("")
 async def single_user_read_post(
     request: Request,
     username: str = Form(...),
     current_user=Depends(get_current_user),
 ):
-    """
-    學生儀表板頁面
-    - 未登入使用者無法進入學生儀表板，會被導向首頁
-    - 已登入使用者，且使用者角色為非學生，無法進入學生儀表板，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為學生，可進入學生儀表板
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
 
-    # Check if the query user is a student
-    student = await UserCrud.get_by_username(username)
-    if not student:
+    # Check if the user to be viewed exists
+    user_to_read = await UserCrud.get_by_username(username)
+    if not user_to_read:
         return templates.TemplateResponse(
             "user_read.html",
             {
@@ -83,7 +69,8 @@ async def single_user_read_post(
             },
         )
 
-    if student.role != Role.STUDENT:
+    # Check if the user to be viewed is a student
+    if user_to_read.role != Role.STUDENT:
         return templates.TemplateResponse(
             "user_read.html",
             {
@@ -93,54 +80,39 @@ async def single_user_read_post(
             },
         )
 
-    # Get all exam info of current student
-    exam_records = await ExamRecordCrud.get_by_user_id(student.id)
-    exam_lists = {
-        subject_type: await get_exam_summary(
-            [item.id for item in exam_records if item.subject_type == subject_type]
-        )
-        for subject_type in SUBJECT_EXAM_INFO
-    }
-
     # Render dashboard_student.html
     return templates.TemplateResponse(
         "dashboard_student.html",
         {
             "request": request,
             "current_user": current_user,
-            "student_info": student,
-            "exam_lists": exam_lists,
+            "student_info": user_to_read,
+            "exam_lists": await get_exam_render_info(user_to_read.id),
         },
     )
 
 
-@router.post("/bulk", response_class=HTMLResponse)
+@router.post("/bulk")
 async def multiple_user_read_post(
-    request: Request,
     current_user=Depends(get_current_user),
 ):
-    """
-    查詢多位使用者資訊，並輸出成 csv
-    - 未登入使用者無法進入使用者列表頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入使用者列表頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可進入使用者列表頁面
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
-
-    # Check if the user(s) to be viewed exist(s)
-    all_users = await UserCrud.get_all()
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
 
     # Generate CSV content
     buffer = StringIO()
     csv_writer = writer(buffer)
     csv_writer.writerow(["username", "name", "role", "created_at"])
+
+    all_users = await UserCrud.get_all()
     for user in all_users:
         csv_writer.writerow([user.username, user.name, user.role, user.created_at])
+
     buffer.seek(0)
 
     # Return CSV as downloadable file

@@ -5,7 +5,6 @@ from auth.passwd import get_password_hash
 from crud.user import UserCrudManager
 from database.mysql import init_db, close_db, drop_all_tables
 from models.base import Role
-from models.user import Role
 from schemas import user as UserSchema
 from settings.configs import Settings
 
@@ -26,7 +25,7 @@ async def create_admin_user():
 
 async def main():
     await init_db()
-    await create_admin_user()
+    # await create_admin_user()
     await api_run()
     await drop_all_tables()
     await close_db()

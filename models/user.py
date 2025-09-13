@@ -28,8 +28,9 @@ class User(Base):
         password: str,
         name: str,
         role: str,
+        id: str = None,
     ):
-        self.id = str(uuid4())
+        self.id = id or str(uuid4())
         self.username = username
         self.password = password
         self.name = name

@@ -2,7 +2,7 @@
 <div class="question-function">
     <h2>搜尋題目功能</h2>
     <p>輸入題目編號，搜尋該題目資訊</p>
-    <form action="/teacher/question/read" method="post">
+    <form action="/question/read" method="post">
         <label for="question_id">題目編號 (格式：M-xxxx / N-xxxx)</label>
         <input
             type="text"
@@ -35,7 +35,7 @@
 <div class="question-function">
     <h2>列出題目清單功能</h2>
     <p>輸出指定科目的題目 csv 清單 (含題目檔名、答案)</p>
-    <form action="/teacher/question/read/bulk" method="post">
+    <form action="/question/read/bulk" method="post">
         <select id="subject" name="subject" required>
             <option value="math">數學科題目</option>
             <option value="nature_science">自然科題目</option>

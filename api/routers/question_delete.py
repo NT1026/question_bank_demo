@@ -1,42 +1,34 @@
 from csv import DictReader
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from io import StringIO
 
 from .depends import get_current_user
 from api.response import (
     _302_REDIRECT_TO_HOME,
-    _403_NOT_A_TEACHER,
+    _403_NOT_A_ADMIN_OR_TEACHER,
 )
 from crud.question import QuestionCrudManager
 from models.base import Role
-from settings.configs import Settings
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
-settings = Settings()
 
 QuestionCrud = QuestionCrudManager()
 
 
-@router.get("", response_class=HTMLResponse)
+@router.get("")
 async def question_delete(
     request: Request,
     current_user=Depends(get_current_user),
 ):
-    """
-    刪除題目頁面
-    - 未登入使用者無法進入刪除題目頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入刪除題目頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可進入刪除題目頁面
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
 
     # Render question_delete.html
     return templates.TemplateResponse(
@@ -48,28 +40,23 @@ async def question_delete(
     )
 
 
-@router.post("", response_class=HTMLResponse)
+@router.post("")
 async def single_question_delete_post(
     request: Request,
     filename: str = Form(...),
     current_user=Depends(get_current_user),
 ):
-    """
-    刪除題目頁面的 POST 請求處理
-    - 未登入使用者無法進入刪除題目頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入刪除題目頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可提交刪除題目請求
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
 
-    # Check if the question(s) to be deleted exist(s)
-    questions_to_delete = await QuestionCrud.get_by_filename(filename)
-    if not questions_to_delete:
+    # Check if question_to_delete exist
+    question_to_delete = await QuestionCrud.get_by_filename(filename)
+    if not question_to_delete:
         return templates.TemplateResponse(
             "question_delete.html",
             {
@@ -79,7 +66,7 @@ async def single_question_delete_post(
             },
         )
 
-    # Delete all questions with the given filename
+    # Delete the question with the given filename
     await QuestionCrud.delete_by_filename(filename)
     return templates.TemplateResponse(
         "question_delete.html",
@@ -91,42 +78,60 @@ async def single_question_delete_post(
     )
 
 
-@router.post("/bulk", response_class=HTMLResponse)
+@router.post("/bulk")
 async def multiple_question_delete_post(
     request: Request,
     file: UploadFile = File(...),
     current_user=Depends(get_current_user),
 ):
-    """
-    批次刪除題目頁面的 POST 請求處理
-    - 未登入使用者無法進入刪除題目頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入刪除題目頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可提交批次刪除題目請求
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
 
-    # Read CSV file
-    content = await file.read()
-    decoded_content = content.decode("utf-8")
-    csv_reader = DictReader(StringIO(decoded_content))
+    # Check if the uploaded file is a CSV file
+    if file.content_type != "text/csv":
+        return templates.TemplateResponse(
+            "user_delete.html",
+            {
+                "request": request,
+                "current_user": current_user,
+                "error_multiple": "上傳檔案格式錯誤，請上傳 CSV 檔案",
+            },
+        )
 
-    success_questions = []
-    error_questions = []
+    # Check CSV file content and delete questions
+    try:
+        content = await file.read()
+        decoded_content = content.decode("utf-8")
+        csv_reader = DictReader(StringIO(decoded_content))
 
-    for row in csv_reader:
-        serial_number = row.get("serial_number").strip()
-        question_to_delete = await QuestionCrud.get_by_filename(serial_number)
-        if question_to_delete:
-            await QuestionCrud.delete_by_filename(serial_number)
-            success_questions.append(serial_number)
+        success_questions = []
+        error_questions = []
 
-        else:
-            error_questions.append(serial_number)
+        for row in csv_reader:
+            serial_number = row["serial_number"].strip()
+
+            question_to_delete = await QuestionCrud.get_by_filename(serial_number)
+            if question_to_delete:
+                await QuestionCrud.delete_by_filename(serial_number)
+                success_questions.append(serial_number)
+
+            else:
+                error_questions.append(serial_number)
+
+    except Exception:
+        return templates.TemplateResponse(
+            "question_delete.html",
+            {
+                "request": request,
+                "current_user": current_user,
+                "error_multiple": "CSV 檔案內容錯誤，請確認後重新上傳",
+            },
+        )
 
     success_message = (
         f"已刪除題目：{', '.join(success_questions)}" if success_questions else ""

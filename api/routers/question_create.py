@@ -1,6 +1,5 @@
 from csv import DictReader
-from fastapi import APIRouter, Depends, File, Form, Request, status, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.templating import Jinja2Templates
 from io import BytesIO, StringIO
 from pathlib import Path
@@ -11,11 +10,12 @@ from zipfile import ZipFile
 from .depends import get_current_user
 from api.response import (
     _302_REDIRECT_TO_HOME,
-    _403_NOT_A_TEACHER,
+    _403_NOT_A_ADMIN_OR_TEACHER,
 )
 from crud.question import QuestionCrudManager
 from models.base import Role
 from settings.configs import Settings
+from utils.question import is_invalid_answer_format, sorted_answer
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -24,23 +24,18 @@ settings = Settings()
 QuestionCrud = QuestionCrudManager()
 
 
-@router.get("", response_class=HTMLResponse)
+@router.get("")
 async def question_create(
     request: Request,
     current_user=Depends(get_current_user),
 ):
-    """
-    新增題目頁面
-    - 未登入使用者無法進入新增題目頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入新增題目頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可進入新增題目頁面
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
 
     # Render question_create.html
     return templates.TemplateResponse(
@@ -52,33 +47,23 @@ async def question_create(
     )
 
 
-@router.post("", response_class=HTMLResponse)
+@router.post("")
 async def single_question_create_post(
     request: Request,
     file: UploadFile = File(...),
     answer: str = Form(...),
     current_user=Depends(get_current_user),
 ):
-    """
-    新增單題題目頁面的 POST 請求處理
-    - 未登入使用者無法進入新增題目頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入新增題目頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可提交新增單題題目請求
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
 
-    # Check answer format is valid
-    sorted_answer = "".join(sorted(list(item for item in answer.upper())))
-    if (
-        not sorted_answer
-        or not all(c in "ABCD" for c in sorted_answer)
-        or len(sorted_answer) > 4
-    ):
+    # Check if answer format is valid
+    if is_invalid_answer_format(answer):
         return templates.TemplateResponse(
             "question_create.html",
             {
@@ -88,7 +73,7 @@ async def single_question_create_post(
             },
         )
 
-    # File type check
+    # Check if file is JPG
     if file.content_type not in ["image/jpeg"]:
         return templates.TemplateResponse(
             "question_create.html",
@@ -137,7 +122,7 @@ async def single_question_create_post(
             id=question_id,
             subject=subject,
             image_path=str(image_path),
-            answer=sorted_answer,
+            answer=sorted_answer(answer),
         )
 
         return templates.TemplateResponse(
@@ -157,24 +142,24 @@ async def single_question_create_post(
                 "current_user": current_user,
                 "error_single": f"新增題目失敗：{file.filename}",
             },
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 
-@router.post("/bulk", response_class=HTMLResponse)
+@router.post("/bulk")
 async def multiple_questions_create_post(
     request: Request,
     file: UploadFile = File(...),
     current_user=Depends(get_current_user),
 ):
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
 
-    # File type check
+    # Check if file is zip
     if not file.filename.endswith(".zip"):
         return templates.TemplateResponse(
             "question_create.html",
@@ -185,12 +170,12 @@ async def multiple_questions_create_post(
             },
         )
 
+    success_to_add = []
     failed_to_add = []
     try:
-        # Read zip file
         zip_data = await file.read()
         with ZipFile(BytesIO(zip_data)) as zip_file:
-            # Extract CSV file
+            # Check if zip contains a CSV file
             csv_filename = next(
                 (name for name in zip_file.namelist() if name.endswith(".csv")),
                 None,
@@ -210,48 +195,37 @@ async def multiple_questions_create_post(
                 csv_reader = DictReader(csv_content)
 
                 for row in csv_reader:
-                    csv_image_name = row.get("filename")
-                    answer = row.get("answer")
+                    csv_filename = row["filename"].strip()
+                    answer = row["answer"].strip()
 
-                    if not csv_image_name or not answer:
-                        failed_to_add.append(f"{csv_image_name} (欄位缺失)")
+                    # Check if answer format is valid
+                    if is_invalid_answer_format(answer):
+                        failed_to_add.append(f"{csv_filename}(答案格式錯誤)")
                         continue
 
-                    # Check answer format
-                    sorted_answer = "".join(
-                        sorted(list(item for item in answer.upper()))
-                    )
-                    if (
-                        not sorted_answer
-                        or not all(c in "ABCD" for c in sorted_answer)
-                        or len(sorted_answer) > 4
-                    ):
-                        failed_to_add.append(f"{csv_image_name} (答案格式錯誤)")
-                        continue
-
-                    # Check duplicate
+                    # Check if question already exists
                     existing_question = await QuestionCrud.get_by_filename(
-                        f"{Path(csv_image_name).stem}"
+                        f"{Path(csv_filename).stem}"
                     )
                     if existing_question:
-                        failed_to_add.append(f"{csv_image_name} (題目已存在)")
+                        failed_to_add.append(f"{csv_filename}(題目已存在)")
                         continue
 
-                    # Find image inside zip
+                    # Check if image exists in zip
                     zip_image_path = next(
                         (
                             name
                             for name in zip_file.namelist()
-                            if Path(name).name == csv_image_name
+                            if Path(name).name == csv_filename
                         ),
                         None,
                     )
                     if not zip_image_path:
-                        failed_to_add.append(f"{csv_image_name} (找不到對應圖片檔)")
+                        failed_to_add.append(f"{csv_filename}(找不到對應圖片檔)")
                         continue
 
                     # Save image to disk
-                    is_math = csv_image_name.startswith("M")
+                    is_math = csv_filename.startswith("M")
                     subject = "math" if is_math else "nature_science"
                     subject_folder = (
                         settings.MATH_DIRNAME
@@ -267,7 +241,7 @@ async def multiple_questions_create_post(
                     final_image_path = (
                         base_path
                         / subject_folder
-                        / f"{Path(csv_image_name).stem}_{question_id}.jpg"
+                        / f"{Path(csv_filename).stem}_{question_id}.jpg"
                     )
 
                     with zip_file.open(zip_image_path) as src, final_image_path.open(
@@ -280,28 +254,9 @@ async def multiple_questions_create_post(
                         id=question_id,
                         subject=subject,
                         image_path=str(final_image_path),
-                        answer=sorted_answer,
+                        answer=sorted_answer(answer),
                     )
-
-                if failed_to_add:
-                    failed_list = ",".join(failed_to_add)
-                    return templates.TemplateResponse(
-                        "question_create.html",
-                        {
-                            "request": request,
-                            "current_user": current_user,
-                            "error_multiple": f"以下題目新增失敗：{failed_list}",
-                        },
-                    )
-
-                return templates.TemplateResponse(
-                    "question_create.html",
-                    {
-                        "request": request,
-                        "current_user": current_user,
-                        "success_multiple": f"已新增題目：{file.filename}",
-                    },
-                )
+                    success_to_add.append(csv_filename)
 
     except Exception:
         return templates.TemplateResponse(
@@ -311,5 +266,21 @@ async def multiple_questions_create_post(
                 "current_user": current_user,
                 "error_multiple": f"新增題目失敗",
             },
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+    success_message = (
+        f"已新增題目：{', '.join(success_to_add)}" if success_to_add else ""
+    )
+    failed_message = (
+        f"新增失敗題目：{', '.join(failed_to_add)}" if failed_to_add else ""
+    )
+
+    return templates.TemplateResponse(
+        "question_create.html",
+        {
+            "request": request,
+            "current_user": current_user,
+            "success_multiple": success_message,
+            "error_multiple": failed_message,
+        },
+    )

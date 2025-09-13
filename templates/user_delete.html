@@ -2,15 +2,15 @@
 <div class="user-function">
     <h2>刪除單一使用者功能</h2>
     <p>輸入指定帳號，刪除指定使用者 (含過去考試紀錄)</p>
-    <form action="/teacher/user/delete" method="post">
+    <form action="/user/delete" method="post">
         <label for="username">帳號 (身分證字號)</label>
         <input type="text" id="username" name="username" required />
         <button type="submit">刪除</button>
     </form>
-    {% if error_single %}
-    <p style="color: red">{{ error_single }}</p>
-    {% endif %} {% if success_single %}
+    {% if success_single %}
     <p style="color: green">{{ success_single }}</p>
+    {% endif %} {% if error_single %}
+    <p style="color: red">{{ error_single }}</p>
     {% endif %}
 </div>
 
@@ -18,7 +18,7 @@
     <h2>刪除多個使用者功能</h2>
     <p>輸入 csv 檔，一次刪除多個使用者 (含過去考試紀錄)</p>
     <form
-        action="/teacher/user/delete/bulk"
+        action="/user/delete/bulk"
         method="post"
         enctype="multipart/form-data"
     >
@@ -26,10 +26,10 @@
         <input type="file" name="file" id="file" required />
         <button type="submit">建立</button>
     </form>
-    {% if error_multiple %}
-    <p style="color: red">{{ error_multiple }}</p>
-    {% endif %} {% if success_multiple %}
+    {% if success_multiple %}
     <p style="color: green">{{ success_multiple }}</p>
+    {% endif %} {% if error_multiple %}
+    <p style="color: red">{{ error_multiple }}</p>
     {% endif %}
 </div>
 {% endblock %}

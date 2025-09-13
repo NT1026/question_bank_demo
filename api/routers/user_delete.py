@@ -1,13 +1,12 @@
 from csv import DictReader
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from io import StringIO
 
 from .depends import get_current_user
 from api.response import (
     _302_REDIRECT_TO_HOME,
-    _403_NOT_A_TEACHER,
+    _403_NOT_A_ADMIN_OR_TEACHER,
 )
 from crud.user import UserCrudManager
 from models.base import Role
@@ -20,23 +19,18 @@ templates = Jinja2Templates(directory="templates")
 UserCrud = UserCrudManager()
 
 
-@router.get("", response_class=HTMLResponse)
+@router.get("")
 async def user_delete(
     request: Request,
     current_user=Depends(get_current_user),
 ):
-    """
-    刪除使用者頁面
-    - 未登入使用者無法進入刪除使用者頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入刪除使用者頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可進入刪除使用者頁面
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
 
     # Render user_delete.html
     return templates.TemplateResponse(
@@ -48,25 +42,20 @@ async def user_delete(
     )
 
 
-@router.post("", response_class=HTMLResponse)
+@router.post("")
 async def single_user_delete_post(
     request: Request,
     username: str = Form(...),
     current_user=Depends(get_current_user),
 ):
-    """
-    刪除使用者頁面的 POST 請求處理
-    - 未登入使用者無法進入刪除使用者頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入刪除使用者頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可提交刪除使用者請求
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
-    
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
+
     # Prevent deletion of admin account
     if username == settings.ADMIN_USERNAME:
         return templates.TemplateResponse(
@@ -102,46 +91,65 @@ async def single_user_delete_post(
     )
 
 
-@router.post("/bulk", response_class=HTMLResponse)
+@router.post("/bulk")
 async def multiple_user_delete_post(
     request: Request,
     file: UploadFile = File(...),
     current_user=Depends(get_current_user),
 ):
-    """
-    批次刪除使用者頁面的 POST 請求處理
-    - 未登入使用者無法進入刪除使用者頁面，會被導向首頁
-    - 已登入使用者，且使用者角色為非老師，無法進入刪除使用者頁面，會回應 403 錯誤
-    - 已登入使用者，且使用者角色為老師，可提交批次刪除使用者請求
-    """
-    # Check if user is teacher
+    # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
 
-    # Read CSV file
-    content = await file.read()
-    decoded_content = content.decode("utf-8")
-    csv_reader = DictReader(StringIO(decoded_content))
+    # Check if the uploaded file is a CSV file
+    if file.content_type != "text/csv":
+        return templates.TemplateResponse(
+            "user_delete.html",
+            {
+                "request": request,
+                "current_user": current_user,
+                "error_multiple": "上傳檔案格式錯誤，請上傳 CSV 檔案",
+            },
+        )
 
-    success_usernames = []
-    error_usernames = []
+    # Check CSV file content and delete users
+    try:
+        content = await file.read()
+        decoded_content = content.decode("utf-8")
+        csv_reader = DictReader(StringIO(decoded_content))
 
-    for row in csv_reader:
-        username = row.get("username")
-        if username == settings.ADMIN_USERNAME:
-            error_usernames.append(username)
-            continue
+        success_usernames = []
+        error_usernames = []
 
-        user_to_delete = await UserCrud.get_by_username(username)
-        if user_to_delete:
-            await UserCrud.delete_by_username(username)
-            success_usernames.append(username)
+        for row in csv_reader:
+            username = row["username"].strip()
 
-        else:
-            error_usernames.append(username)
+            # Prevent deletion of admin account
+            if username == settings.ADMIN_USERNAME:
+                error_usernames.append(username)
+                continue
+
+            user_to_delete = await UserCrud.get_by_username(username)
+            if user_to_delete:
+                await UserCrud.delete_by_username(username)
+                success_usernames.append(username)
+
+            else:
+                error_usernames.append(username)
+
+    except Exception:
+        return templates.TemplateResponse(
+            "user_delete.html",
+            {
+                "request": request,
+                "current_user": current_user,
+                "error_multiple": "CSV 檔案內容錯誤，請確認檔案格式正確",
+            },
+        )
 
     success_message = (
         f"已刪除使用者帳號：{', '.join(success_usernames)}" if success_usernames else ""

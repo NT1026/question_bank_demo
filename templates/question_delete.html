@@ -2,15 +2,15 @@
 <div class="question-function">
     <h2>刪除單一題目功能</h2>
     <p>輸入題目編號，刪除指定題目</p>
-    <form action="/teacher/question/delete" method="post">
+    <form action="/question/delete" method="post">
         <label for="filename">題目編號 (格式：M-xxxx / N-xxxx)</label>
         <input type="text" id="filename" name="filename" required />
         <button type="submit">刪除</button>
     </form>
-    {% if error_single %}
-    <p style="color: red">{{ error_single }}</p>
-    {% endif %} {% if success_single %}
+    {% if success_single %}
     <p style="color: green">{{ success_single }}</p>
+    {% endif %} {% if error_single %}
+    <p style="color: red">{{ error_single }}</p>
     {% endif %}
 </div>
 
@@ -18,7 +18,7 @@
     <h2>刪除多題題目功能</h2>
     <p>輸入 csv 檔，一次刪除多題題目</p>
     <form
-        action="/teacher/question/delete/bulk"
+        action="/question/delete/bulk"
         method="post"
         enctype="multipart/form-data"
     >
@@ -26,10 +26,10 @@
         <input type="file" name="file" id="file" required />
         <button type="submit">建立</button>
     </form>
-    {% if error_multiple %}
-    <p style="color: red">{{ error_multiple }}</p>
-    {% endif %} {% if success_multiple %}
+    {% if success_multiple %}
     <p style="color: green">{{ success_multiple }}</p>
+    {% endif %} {% if error_multiple %}
+    <p style="color: red">{{ error_multiple }}</p>
     {% endif %}
 </div>
 {% endblock %}
