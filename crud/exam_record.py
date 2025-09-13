@@ -85,14 +85,3 @@ class ExamRecordCrudManager:
                 )
 
         return rendered_user_answers
-
-    async def delete(
-        self,
-        exam_record_id: str,
-        db_session: AsyncSession,
-    ):
-        stmt = delete(ExamRecordModel).where(ExamRecordModel.id == exam_record_id)
-        await db_session.execute(stmt)
-        await db_session.commit()
-
-        return
