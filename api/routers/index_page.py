@@ -4,12 +4,10 @@ from fastapi.templating import Jinja2Templates
 from .depends import get_current_user
 from api.response import (
     _302_REDIRECT_TO_HOME,
-    _302_REDIRECT_TO_ADMIN_DASHBOARD,
     _302_REDIRECT_TO_STUDENT_DASHBOARD,
     _302_REDIRECT_TO_TEACHER_DASHBOARD,
-    _403_NOT_A_ADMIN,
     _403_NOT_A_STUDENT,
-    _403_NOT_A_TEACHER,
+    _403_NOT_A_ADMIN_OR_TEACHER,
 )
 from models.base import Role
 from utils.exam import get_exam_render_info
@@ -28,38 +26,11 @@ async def index_page(
         return templates.TemplateResponse("index.html", {"request": request})
 
     # Check user role
-    if current_user.role == Role.ADMIN:
-        return _302_REDIRECT_TO_ADMIN_DASHBOARD
-
-    elif current_user.role == Role.STUDENT:
+    if current_user.role == Role.STUDENT:
         return _302_REDIRECT_TO_STUDENT_DASHBOARD
 
-    elif current_user.role == Role.TEACHER:
+    elif current_user.role == Role.TEACHER or current_user.role == Role.ADMIN:
         return _302_REDIRECT_TO_TEACHER_DASHBOARD
-
-
-@router.get("/admin/dashboard")
-async def admin_dashboard(
-    request: Request,
-    current_user=Depends(get_current_user),
-):
-    # Check if not logged in
-    if not current_user:
-        return _302_REDIRECT_TO_HOME
-
-    # Check if user is admin
-    if current_user.role != Role.ADMIN:
-        return _403_NOT_A_ADMIN
-
-    # Render dashboard_admin.html (TODO)
-    # return templates.TemplateResponse(
-    #     "dashboard_admin.html",
-    #     {
-    #         "request": request,
-    #         "current_user": current_user,
-    #     },
-    # )
-    return _302_REDIRECT_TO_HOME
 
 
 @router.get("/student/dashboard")
@@ -96,9 +67,9 @@ async def teacher_dashboard(
     if not current_user:
         return _302_REDIRECT_TO_HOME
 
-    # Check if user is teacher
-    if current_user.role != Role.TEACHER:
-        return _403_NOT_A_TEACHER
+    # Check if user is teacher or admin
+    if current_user.role not in [Role.TEACHER, Role.ADMIN]:
+        return _403_NOT_A_ADMIN_OR_TEACHER
 
     # Render dashboard_teacher.html
     return templates.TemplateResponse(

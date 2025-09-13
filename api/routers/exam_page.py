@@ -7,7 +7,6 @@ from api.response import (
     _302_REDIRECT_TO_HOME,
     _403_CANNOT_ACCESS_OTHER_USER_DATA,
     _403_NOT_A_STUDENT,
-    _403_NOT_A_TEACHER_OR_STUDENT,
     _404_EXAM_RECORD_NOT_FOUND,
     _404_EXAM_TYPE_NOT_FOUND,
 )
@@ -113,11 +112,6 @@ async def get_exam_record(
     # Check if not logged in
     if not current_user:
         return _302_REDIRECT_TO_HOME
-
-    # Check if user is student or teacher
-    allowed_roles = [Role.STUDENT, Role.TEACHER]
-    if current_user.role not in allowed_roles:
-        return _403_NOT_A_TEACHER_OR_STUDENT
 
     # Check exam_record_id is valid
     exam_record = await ExamRecordCrud.get(exam_record_id)

@@ -17,11 +17,6 @@ _302_REDIRECT_TO_HOME = RedirectResponse(
     status_code=status.HTTP_302_FOUND,
 )
 
-_302_REDIRECT_TO_ADMIN_DASHBOARD = RedirectResponse(
-    "/admin/dashboard",
-    status_code=status.HTTP_302_FOUND,
-)
-
 _302_REDIRECT_TO_STUDENT_DASHBOARD = RedirectResponse(
     "/student/dashboard",
     status_code=status.HTTP_302_FOUND,
@@ -43,23 +38,8 @@ _403_CANNOT_ACCESS_OTHER_USER_DATA = HTMLResponse(
     status_code=status.HTTP_403_FORBIDDEN,
 )
 
-_403_NOT_A_ADMIN = HTMLResponse(
-    "您的角色非管理員，無法使用該功能",
-    status_code=status.HTTP_403_FORBIDDEN,
-)
-
 _403_NOT_A_STUDENT = HTMLResponse(
     "您的角色非學生，無法使用該功能",
-    status_code=status.HTTP_403_FORBIDDEN,
-)
-
-_403_NOT_A_TEACHER = HTMLResponse(
-    "您的角色非教師，無法使用該功能",
-    status_code=status.HTTP_403_FORBIDDEN,
-)
-
-_403_NOT_A_TEACHER_OR_STUDENT = HTMLResponse(
-    "您的角色非教師或學生，無法使用該功能",
     status_code=status.HTTP_403_FORBIDDEN,
 )
 
@@ -105,41 +85,8 @@ _404_IMAGE_FILE_NOT_FOUND_API = HTTPException(
 )
 
 
-
-
-# Page Responses
-
-
-# User API Responses
-_404_USER_NOT_FOUND_API = HTTPException(
-    status_code=status.HTTP_404_NOT_FOUND,
-    detail="User does not exist",
-)
-
+# tmp
 _409_USER_EXISTS_API = HTTPException(
     status_code=status.HTTP_409_CONFLICT,
     detail="User already exists",
-)
-
-# Question API Responses
-_400_INVALID_ANSWER_FORMAT_API = HTTPException(
-    status_code=status.HTTP_400_BAD_REQUEST,
-    detail="Invalid answer format",
-)
-
-_400_INVALID_JPG_TYPE_API = HTTPException(
-    status_code=status.HTTP_400_BAD_REQUEST,
-    detail="Invalid file type, only JPG is allowed",
-)
-
-
-_500_CREATE_QUESTION_FAILED_API = HTTPException(
-    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    detail="Create question failed",
-)
-
-# Exam Record API Responses
-_404_EXAM_RECORD_NOT_FOUND_API = HTTPException(
-    status_code=status.HTTP_404_NOT_FOUND,
-    detail="Exam record does not exist",
 )
